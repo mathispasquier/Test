@@ -33,7 +33,7 @@ GCR = 0.28
 Time, GHI, DHI, DNI, Solar zenith, Solar azimuth
 From 2021-01-01 to 2021-12-31 approximately every 20sec (not regular)  """
 
-real_weather = pd.read_csv('../Risø Data.csv').iloc[0:2513]
+real_weather = pd.read_csv('../../Risø Data formatted.csv')
 
 # Set the timestamps as the new index
 
@@ -43,19 +43,20 @@ real_weather.index.name = "utc_time"
 
 real_weather.index = pd.to_datetime(real_weather.index)
 
-# Resample to get a full day of data with 1 min resolution. The morning & evening values remain without irradiance data.
+# Select the days
 
-times = pd.date_range('2021-01-01', '2021-01-02', freq='1min', tz=tz)
+m = 180 # Day when it begins
+n = 183 # Day when it ends
 
-real_weather = real_weather.reindex(times, method='nearest',limit=60)
+real_weather = real_weather.iloc[(m-1)*1440:(n-1)*1440]
 
-GHI = real_weather["GHI"].fillna(0)
+GHI = real_weather["GHI"]
+DHI = real_weather["DHI"]
+DNI = real_weather["DNI"]
 
-DHI = real_weather["DHI"].fillna(0)
+""" Calculate the solar position for each time """
 
-DNI = real_weather["DNI"].fillna(0)
-
-solpos = pvlib.solarposition.get_solarposition(times, latitude, longitude, altitude)
+solpos = pvlib.solarposition.get_solarposition(real_weather.index, latitude, longitude, altitude)
 
 apparent_zenith = solpos["apparent_zenith"]
 
@@ -64,10 +65,9 @@ azimuth = solpos["azimuth"]
 """ For each time, calculate optimal angle of rotation (with 2° resolution) that yields the maximum POA
 Use a transposition model to calculate POA irradiance from GHI, DNI and DHI """
 
-beta_opt = pd.DataFrame(data=None, index=real_weather.index)
-beta_opt["beta"] = ""
-beta_opt["POA_global"] = ""
-test = []
+brute_force_search = pd.DataFrame(data=None, index=real_weather.index)
+brute_force_search["beta_opt"] = 0
+brute_force_search["POA_global_opt"] = 0
 
 beta_range = range(-max_angle, max_angle + 2, 2)
 
@@ -78,18 +78,20 @@ for time, data in real_weather.iterrows():
     
     for beta in beta_range:
     
+        # Transposition model 
+        
         POA_data = pvlib.irradiance.get_total_irradiance(beta, axis_azimuth, apparent_zenith[time], azimuth[time], DNI[time], GHI[time], DHI[time])
         POA_global = POA_data["poa_global"]
+        
+        # Definition of the new optimal angle when the associated POA is maximal
         
         if POA_global > POA_max:
             
             POA_max = POA_global
             beta_POA_max = beta
     
-    beta_opt.loc[time,"beta"] = beta_POA_max
-    beta_opt.loc[time,"POA_global"] = POA_max
-    
-    test.append((time,POA_max, beta_POA_max))
+    brute_force_search.loc[time,"beta_opt"] = beta_POA_max
+    brute_force_search.loc[time,"POA_global_opt"] = POA_max
         
 """ Comparison with true tracking """
 
@@ -102,10 +104,17 @@ truetracking_angles = pvlib.tracking.singleaxis(
     backtrack=False,  # for true-tracking
     gcr=GCR)  # irrelevant for true-tracking
 
+fig, ax = plt.subplots()
+
 truetracking_position = truetracking_angles['tracker_theta'].fillna(0)
 
-truetracking_position.plot(title='Truetracking Curve')
+optimal_angle = brute_force_search["beta_opt"]
+optimal_angle.index = truetracking_position.index
 
+truetracking_position.plot(title='Tracking Curve', label="Astronomical tracking",ax=ax)
+optimal_angle.plot(title='Tracking Curve', label="Optimal tracking", ax=ax)
 
+plt.legend()
+plt.show() 
     
     

@@ -33,7 +33,7 @@ GCR = 0.28
 Time, GHI, DHI, DNI, Solar zenith, Solar azimuth
 From 2021-01-01 to 2021-12-31 approximately every 20sec (not regular)  """
 
-real_weather = pd.read_csv('../Risø Data.csv').iloc[0:2513]
+real_weather = pd.read_csv('../../Risø Data.csv')#.iloc[0:2513]
 
 # Set the timestamps as the new index
 
@@ -64,46 +64,40 @@ azimuth = solpos["azimuth"]
 """ For each time, calculate optimal angle of rotation (with 2° resolution) that yields the maximum POA
 Use a transposition model to calculate POA irradiance from GHI, DNI and DHI """
 
-beta_opt = pd.DataFrame(data=None, index=real_weather.index)
-beta_opt["beta"] = ""
-beta_opt["POA_global"] = ""
-test = []
-
 beta_range = range(-max_angle, max_angle + 2, 2)
 
-for time, data in real_weather[720]:
+time_test = "2023-01-01 10:00:00+01:00"
+   
+POA_max = 0
+beta_POA_max = 0
+list_test = []
+
+for beta in beta_range:
+
+    POA_data = pvlib.irradiance.get_total_irradiance(beta, axis_azimuth, apparent_zenith[time_test], azimuth[time_test], DNI[time_test], GHI[time_test], DHI[time_test])
+    POA_data = pvlib.irradiance.get_total_irradiance(beta, axis_azimuth, apparent_zenith[time_test], azimuth[time_test], DNI[time_test], GHI[time_test], DHI[time_test])
+    POA_global = POA_data["poa_global"]
     
-    POA_max = 0
-    beta_POA_max = 0
-    list_test = []
+    list_test.append((beta,POA_global))
     
-    for beta in beta_range:
-    
-        POA_data = pvlib.irradiance.get_total_irradiance(beta, axis_azimuth, apparent_zenith[time], azimuth[time], DNI[time], GHI[time], DHI[time])
-        POA_global = POA_data["poa_global"]
+    if POA_global > POA_max:
         
-        list_test.append((beta,POA_global))
-        
-        if POA_global > POA_max:
-            
-            POA_max = POA_global
-            beta_POA_max = beta
+        POA_max = POA_global
+        beta_POA_max = beta
+
+
+
     
-    beta_opt.loc[time,"beta"] = beta_POA_max
-    beta_opt.loc[time,"POA_global"] = POA_max
-    
-    test.append((time,POA_max, beta_POA_max))
-        
 """ Comparison with true tracking """
 
 truetracking_angles = pvlib.tracking.singleaxis(
-    apparent_zenith=apparent_zenith,
-    apparent_azimuth=azimuth,
-    axis_tilt=axis_tilt,
-    axis_azimuth=axis_azimuth,
-    max_angle=max_angle,
-    backtrack=False,  # for true-tracking
-    gcr=GCR)  # irrelevant for true-tracking
+apparent_zenith=apparent_zenith,
+apparent_azimuth=azimuth,
+axis_tilt=axis_tilt,
+axis_azimuth=axis_azimuth,
+max_angle=max_angle,
+backtrack=False,  # for true-tracking
+gcr=GCR)  # irrelevant for true-tracking
 
 truetracking_position = truetracking_angles['tracker_theta'].fillna(0)
 
