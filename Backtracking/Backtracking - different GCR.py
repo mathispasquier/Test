@@ -7,8 +7,6 @@ Created on Mon Feb  5 16:14:05 2024
 Comparison of backtracking curves for different GCR & maximum angles of rotation
 """
 
-#Test
-
 import pvlib
 
 import pandas as pd
