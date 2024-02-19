@@ -45,8 +45,8 @@ real_weather.index = pd.to_datetime(real_weather.index)
 
 # Select the days
 
-m = 180 # Day when it begins
-n = 183 # Day when it ends
+m = 160 # Day when it begins
+n = 165 # Day when it ends
 
 real_weather = real_weather.iloc[(m-1)*1440:(n-1)*1440]
 
