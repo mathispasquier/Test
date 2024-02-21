@@ -77,11 +77,12 @@ DNI = real_weather["DNI"]
 """ For each time, calculate optimal angle of rotation (with 2° resolution) that yields the maximum POA
 Use a transposition model to calculate POA irradiance from GHI, DNI and DHI """
 
-brute_force_search = pd.DataFrame(data=None, index=real_weather.index)
-brute_force_search["beta_opt"] = 0.0
-brute_force_search["POA_global_opt"] = 0.0
+b = []
+POA_l = []
 
-for time, data in real_weather.iterrows():
+for i in range(real_weather.index.size):
+    
+#for time, data in real_weather.iterrows():
     
     POA_max = 0.0
     beta_POA_max = 0
@@ -91,15 +92,15 @@ for time, data in real_weather.iterrows():
     
         # Transposition model 
         
-        POA_data = pvlib.irradiance.get_total_irradiance(surface_tilt=-beta, 
+        POA_data = pvlib.irradiance.get_total_irradiance(surface_tilt=beta, 
                                                          surface_azimuth=axis_azimuth, 
-                                                         solar_zenith=apparent_zenith[time], 
-                                                         solar_azimuth=azimuth[time], 
-                                                         dni=DNI[time], 
-                                                         ghi=GHI[time],
-                                                         dhi=DHI[time], 
-                                                         dni_extra=DNI_extra[time], 
-                                                         airmass=air_mass[time], 
+                                                         solar_zenith=apparent_zenith.iloc[i], 
+                                                         solar_azimuth=azimuth.iloc[i], 
+                                                         dni=DNI.iloc[i], 
+                                                         ghi=GHI.iloc[i],
+                                                         dhi=DHI.iloc[i], 
+                                                         dni_extra=DNI_extra.iloc[i],
+                                                         airmass=air_mass.iloc[i], 
                                                          model='perez')
         POA_global = POA_data["poa_global"]
         list.append((beta, POA_global))
@@ -111,9 +112,12 @@ for time, data in real_weather.iterrows():
             POA_max = POA_global
             beta_POA_max = beta
     
-    brute_force_search.loc[time,"beta_opt"] = beta_POA_max
-    brute_force_search.loc[time,"POA_global_opt"] = POA_max
-        
+    b.append(beta_POA_max)
+    POA_l.append(POA_max)
+
+brute_force_search = pd.DataFrame(data={'beta_opt':b,'POA_global_opt':POA_l})
+brute_force_search.index = real_weather.index
+
 """ Comparison with true tracking """
 
 truetracking_angles = pvlib.tracking.singleaxis(
