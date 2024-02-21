@@ -103,37 +103,4 @@ for i in range(0,8760):
     if theta < -max_angle or theta > max_angle:
         theta = 0
     rotation_angles_marion.append(theta)
-
-""" Estimation of the energy produced via ModelChain """
-
-
-location = pvlib.location.Location(
-    latitude, 
-    longitude, 
-    tz, 
-    altitude, 
-    name)
-
-mount = pvlib.pvsystem.SingleAxisTrackerMount(
-    axis_tilt,
-    axis_azimuth,
-    max_angle,
-    False)
-
-test = mount.get_orientation(solpos['apparent_zenith'], 
-                             solpos['azimuth'])
-
-array = pvlib.pvsystem.Array(mount=mount, 
-                             module_parameters=module, 
-                             temperature_model_parameters=temperature_model_parameters)
-
-system = pvlib.pvsystem.PVSystem(arrays=[array], 
-                                 inverter_parameters=inverter)
-
-mc = pvlib.modelchain.ModelChain(system, location)
-
-mc.run_model(weather)
-
-annual_energy = mc.results.ac.sum()
-    
     
