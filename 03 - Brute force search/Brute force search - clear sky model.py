@@ -92,8 +92,15 @@ def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_positio
 
         for angle in range(-55,56,2):
             
-            total_irrad = pvlib.irradiance.get_total_irradiance(surface_tilt=angle, 
-                                                                 surface_azimuth=axis_azimuth, 
+            if angle < 0:
+                surface_azimuth = 90 
+                angle_abs = abs(angle)
+            else:
+                surface_azimuth = 270
+                angle_abs = angle
+            
+            total_irrad = pvlib.irradiance.get_total_irradiance(surface_tilt=angle_abs, 
+                                                                 surface_azimuth=surface_azimuth, 
                                                                  dni=dni.iloc[i], 
                                                                  ghi=ghi.iloc[i], 
                                                                  dhi=dhi.iloc[i], 
@@ -104,6 +111,9 @@ def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_positio
                                                                  model='perez',
                                                                  model_perez='allsitescomposite1990')
             total_irradiance = total_irrad['poa_global']
+            
+            #if solar_position['azimuth'].iloc[i] <= 180:
+                #angle = -angle
             
             if total_irradiance > max_irradiance:
                 max_irradiance = total_irradiance
