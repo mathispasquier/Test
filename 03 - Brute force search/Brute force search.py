@@ -35,17 +35,14 @@ From 2021-01-01 to 2021-12-31 approximately every 20sec (not regular)  """
 
 real_weather = pd.read_csv('../../Risø Data formatted.csv')
 
-# Set the index with the format Datetime
-
 real_weather.index = pd.date_range('2021-01-01', '2022-01-01', freq='1min', tz=tz)
 real_weather = real_weather.drop(['TmStamp'],axis=1)
 
-# Select the days
-
 """ Select the days when to calculate via brute force search """
 
-begin = '2021-06-01 00:00:00+01:00'
-end = '2021-06-02 00:00:00+01:00'
+
+begin = '2021-06-01 00:00:00'
+end = '2021-06-02 00:00:00'
 
 real_weather = real_weather.loc[begin:end]
 
@@ -60,46 +57,72 @@ azimuth = solpos["azimuth"]
 """ Calculate air mass and DNI extra for the Perez transposition model """
 
 real_weather["DNI_extra"] = pvlib.irradiance.get_extra_radiation(real_weather.index)
-real_weather["air_mass"] = pvlib.atmosphere.get_relative_airmass(zenith)
+real_weather["airmass"] = pvlib.atmosphere.get_relative_airmass(zenith)
 
-GHI = real_weather["GHI"]
-DHI = real_weather["DHI"]
-DNI = real_weather["DNI"]
 DNI_extra = real_weather["DNI_extra"]
-air_mass = real_weather["air_mass"]
+airmass = real_weather["airmass"]
 
+linketurbidity = pvlib.clearsky.lookup_linke_turbidity(real_weather.index, latitude, longitude)
+
+GHI = real_weather["GHI"] 
+DHI = real_weather["DHI"]
+DNI = real_weather["DNI"] 
 
 """ For each time, calculate optimal angle of rotation (with 2° resolution) that yields the maximum POA
 Use a transposition model to calculate POA irradiance from GHI, DNI and DHI """
 
-brute_force_search = pd.DataFrame(data=None, index=real_weather.index)
-brute_force_search["beta_opt"] = 0.0
-brute_force_search["POA_global_opt"] = 0.0
+def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_position):
+    """
+    Find the optimal rotation angle within given limits.
+    """
+    diffuse_tracking = pd.DataFrame(data=None, index=GHI.index)
+    diffuse_tracking['angle'] = 0.0
+    diffuse_tracking['POA global'] = 0.0
+    optimal_angle = 0
+    
+    for i in range(ghi.index.size):
+        
+        max_irradiance = 0
 
-beta_range = range(-max_angle, max_angle, 2)
-
-for time, data in real_weather.iterrows():
-    
-    POA_max = 0
-    beta_POA_max = 0
-    
-    for beta in beta_range:
-    
-        # Transposition model 
-        
-        POA_data = pvlib.irradiance.get_total_irradiance(beta, axis_azimuth, zenith[time], azimuth[time], DNI[time], GHI[time], DHI[time], DNI_extra[time], air_mass[time], model='perez')
-        POA_global = POA_data["poa_global"]
-        
-        # Definition of the new optimal angle when the associated POA is maximal
-        
-        if POA_global > POA_max:
+        for angle in range(-55,56,2):
             
-            POA_max = POA_global
-            beta_POA_max = beta
-    
-    brute_force_search.loc[time,"beta_opt"] = beta_POA_max
-    brute_force_search.loc[time,"POA_global_opt"] = POA_max
+            if angle < 0:
+                surface_azimuth = 90 
+                angle_abs = abs(angle)
+            else:
+                surface_azimuth = 270
+                angle_abs = angle
+            
+            total_irrad = pvlib.irradiance.get_total_irradiance(surface_tilt=angle_abs, 
+                                                                 surface_azimuth=surface_azimuth, 
+                                                                 dni=dni.iloc[i], 
+                                                                 ghi=ghi.iloc[i], 
+                                                                 dhi=dhi.iloc[i], 
+                                                                 solar_zenith=solar_position['apparent_zenith'].iloc[i], 
+                                                                 solar_azimuth=solar_position['azimuth'].iloc[i],
+                                                                 dni_extra=dni_extra.iloc[i],
+                                                                 airmass=airmass.iloc[i],
+                                                                 model='perez',
+                                                                 model_perez='allsitescomposite1990')
+            total_irradiance = total_irrad['poa_global']
+            
+            #if solar_position['azimuth'].iloc[i] <= 180:
+                #angle = -angle
+            
+            if total_irradiance > max_irradiance:
+                max_irradiance = total_irradiance
+                optimal_angle = angle
         
+        if max_irradiance == 0:
+            optimal_angle = 0
+        
+        diffuse_tracking['angle'].iloc[i] = optimal_angle
+        diffuse_tracking['POA global'].iloc[i] = max_irradiance
+    
+    return diffuse_tracking
+
+diffuse_tracking = find_optimal_rotation_angle(GHI, DHI, DNI, DNI_extra, airmass, solpos)
+
 """ Comparison with true tracking """
 
 truetracking_angles = pvlib.tracking.singleaxis(
@@ -111,25 +134,60 @@ truetracking_angles = pvlib.tracking.singleaxis(
     backtrack=False,  # for true-tracking
     gcr=GCR)  # irrelevant for true-tracking
 
-truetracking_position = truetracking_angles['tracker_theta'].fillna(0)
+true_tracking = pd.DataFrame(data=None, index=GHI.index)
+true_tracking['tracker_theta'] = 0.0
+true_tracking['POA_astronomical'] = 0.0
+true_tracking['tracker_theta'] = truetracking_angles['tracker_theta'].fillna(0)
+
+for i in range(true_tracking.index.size):
+    
+    angle = true_tracking["tracker_theta"].iloc[i]
+        
+    if angle < 0:
+        surface_azimuth = 90 
+        angle_abs = abs(angle)
+    else:
+        surface_azimuth = 270
+        angle_abs = angle
+
+    total_irrad = pvlib.irradiance.get_total_irradiance(surface_tilt=angle_abs, 
+                                                        surface_azimuth=surface_azimuth, 
+                                                        dni=real_weather["DNI"].iloc[i], 
+                                                        ghi=real_weather["GHI"].iloc[i], 
+                                                        dhi=real_weather["DHI"].iloc[i], 
+                                                        solar_zenith=solpos['apparent_zenith'].iloc[i], 
+                                                        solar_azimuth=solpos['azimuth'].iloc[i],
+                                                        dni_extra=real_weather["DNI_extra"].iloc[i],
+                                                        airmass=real_weather["airmass"].iloc[i],
+                                                        model='perez',
+                                                        model_perez='allsitescomposite1990')
+    
+    true_tracking["POA_astronomical"].iloc[i] = total_irrad["poa_global"]
+    
 
 """ Plot data """
 
+# Irradiance GHI, DNI, DHI
+
+"""real_weather["GHI"].plot(title='Actual irradiance data', label="GHI")
+real_weather["DNI"].plot(title='Actual irradiance data', label="DNI")
+real_weather["DHI"].plot(title='Actual irradiance data', label="DHI")"""
+
+# Tracking curves & POA irradiance
+
 fig, axes = plt.subplots(nrows=2, ncols=1, sharex=True)
 
-brute_force_search["beta_opt"].plot(title='Tracking Curve', label="Optimal tracking", ax=axes[0])
-truetracking_position.plot(title='Tracking Curve', label="Astronomical tracking",ax=axes[0])
-#optimal_angle.index = truetracking_position.index
+diffuse_tracking['angle'].plot(title='Tracking Curve', label="Optimal tracking", ax=axes[0])
+true_tracking["tracker_theta"].plot(title='Tracking Curve', label="Astronomical tracking",ax=axes[0])
 
-GHI.plot(title='Irradiance', label="GHI", ax=axes[1])
-DHI.plot(title='Irradiance', label="DHI", ax=axes[1])
-DNI.plot(title='Irradiance', label="DNI", ax=axes[1])
+diffuse_tracking['POA global'].plot(title='Irradiance', label="POA diffuse tracking", ax=axes[1])
+true_tracking["POA_astronomical"].plot(title='Irradiance', label="POA astronomical tracking", ax=axes[1])
 
 axes[0].legend(title="Tracker Tilt")
 axes[1].legend(title="Irradiance")
 
 
 plt.legend()
-plt.show() 
+plt.show()
     
     
