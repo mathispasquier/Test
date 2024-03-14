@@ -41,8 +41,8 @@ real_weather = real_weather.drop(['TmStamp'],axis=1)
 
 """ Select the days when to calculate via brute force search """
 
-begin = '2023-06-01 00:00:00'
-end = '2023-06-02 00:00:00'
+begin = '2023-01-01 00:00:00'
+end = '2024-01-01 00:00:00'
 
 real_weather = real_weather.loc[begin:end]
 
@@ -65,8 +65,21 @@ airmass = real_weather["airmass"]
 linketurbidity = pvlib.clearsky.lookup_linke_turbidity(real_weather.index, latitude, longitude)
 
 GHI = real_weather["GHI"] 
-DHI = real_weather["DHI"]
+DHI = real_weather["DHI"] 
 DNI = real_weather["DNI"] 
+
+""" Decomposition model
+The Erbs method, erbs() developed by Daryl Gregory Erbs at the University of Wisconsin in 1982 is a piecewise 
+correlation that splits kt into 3 regions: linear for kt <= 0.22, a 4th order polynomial between 0.22 < kt <= 0.8, 
+and a horizontal line for kt > 0.8. """
+
+out_erbs = pvlib.irradiance.erbs(GHI, zenith, GHI.index)
+
+DHI_erbs = out_erbs["dhi"]
+DNI_erbs = out_erbs["dni"]
+
+real_weather["DHI_erbs"] = DHI_erbs
+real_weather["DNI_erbs"] = DNI_erbs
 
 """ For each time, calculate optimal angle of rotation (with 2° resolution) that yields the maximum POA
 Use a transposition model to calculate POA irradiance from GHI, DNI and DHI """
@@ -123,6 +136,7 @@ def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_positio
     return diffuse_tracking
 
 diffuse_tracking = find_optimal_rotation_angle(GHI, DHI, DNI, DNI_extra, airmass, solpos)
+diffuse_tracking_erbs = find_optimal_rotation_angle(GHI, DHI_erbs, DNI_erbs, DNI_extra, airmass, solpos)
 
 # KPIs diffuse tracking
 
@@ -130,6 +144,11 @@ total_degrees_diffuse = diffuse_tracking['degrees_moved'].sum()
 delta_t_diffuse = total_degrees_diffuse/w # Total time (in s) during which the tracker moved
 consumption_tracker_diffuse = U*I*delta_t_diffuse/3600000 # in kWh
 energy_yield_diffuse = (diffuse_tracking['POA global'].mean()/1000)*(diffuse_tracking.index.size/60) # Average POA irradiance in kW * number of hours
+
+total_degrees_diffuse_erbs = diffuse_tracking_erbs['degrees_moved'].sum()
+delta_t_diffuse_erbs = total_degrees_diffuse_erbs/w # Total time (in s) during which the tracker moved
+consumption_tracker_diffuse_erbs = U*I*delta_t_diffuse_erbs/3600000 # in kWh
+energy_yield_diffuse_erbs = (diffuse_tracking_erbs['POA global'].mean()/1000)*(diffuse_tracking_erbs.index.size/60) # Average POA irradiance in kW * number of hours
 
 """ Comparison with true tracking """
 
@@ -141,6 +160,8 @@ truetracking_angles = pvlib.tracking.singleaxis(
     max_angle=max_angle,
     backtrack=False,  # for true-tracking
     gcr=GCR)  # irrelevant for true-tracking
+
+# Calculation of POA irradiance for true tracking
 
 true_tracking = pd.DataFrame(data=None, index=GHI.index)
 true_tracking['tracker_theta'] = 0.0
@@ -188,9 +209,11 @@ energy_yield_astronomical = (true_tracking['POA global'].mean()/1000)*(true_trac
 
 # Irradiance GHI, DNI, DHI
 
-"""real_weather["GHI"].plot(title='Actual irradiance data', label="GHI")
-real_weather["DNI"].plot(title='Actual irradiance data', label="DNI")
-real_weather["DHI"].plot(title='Actual irradiance data', label="DHI")
+"""GHI.plot(title='Actual irradiance data', label="GHI")
+DNI.plot(title='Actual irradiance data', label="DNI")
+#DHI.plot(title='Actual irradiance data', label="DHI")
+DNI_erbs.plot(title='Actual irradiance data', label="DNI Erbs", linestyle='--')
+#DHI_erbs.plot(title='Actual irradiance data', label="DHI Erbs")
 
 # Tracking curves & POA irradiance
 
