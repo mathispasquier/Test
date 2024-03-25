@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
-from math import cos, sin, atan, atan2, radians, degrees
+from math import cos, sin, acos, atan, atan2, radians, degrees
 
 """ Input parameters"""
 
@@ -71,7 +71,7 @@ DNI = real_weather["DNI"]
 """ For each time, calculate optimal angle of rotation (with 2° resolution) that yields the maximum POA
 Use a transposition model to calculate POA irradiance from GHI, DNI and DHI """
 
-def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_position):
+def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_position, angle_backtracking, GCR, max_angle):
     """
     Find the optimal rotation angle within given limits.
     """
@@ -81,12 +81,33 @@ def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_positio
     diffuse_tracking['degrees_moved'] = 0.0
     optimal_angle = 0
     previous_angle = 0
+
+    # distance between rows
+    axes_distance = 1/GCR
     
     for i in range(ghi.index.size):
         
         max_irradiance = 0
+        
+        """w_id = solar_position['apparent_zenith'].iloc[i]
+        s = 1/cos(w_id)
+        
+        if s > 1/GCR:
+            temp = pd.abs(axes_distance * cosd(w_id))
+            with np.errstate(invalid='ignore'):
+                w_c = np.degrees(-np.sign(w_id)*np.arccos(temp))
+            w_idc = w_id-w_c
+            #max_angle = int(w_idc)
 
-        for angle in range(-55,56,2):
+
+    
+        # NOTE: in the middle of the day, arccos(temp) is out of range because
+        # there's no row-to-row shade to avoid, & backtracking is unnecessary
+        # [1], Eqs. 15-16
+        with np.errstate(invalid='ignore'):
+            tracker_theta = wid + np.where(temp < 1, wc, 0)"""
+
+        for angle in range(-max_angle,max_angle,1):
             
             if angle < 0:
                 surface_azimuth = 90 
@@ -122,7 +143,18 @@ def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_positio
     
     return diffuse_tracking
 
-diffuse_tracking = find_optimal_rotation_angle(GHI, DHI, DNI, DNI_extra, airmass, solpos)
+truetracking_angles = pvlib.tracking.singleaxis(
+    apparent_zenith=apparent_zenith,
+    apparent_azimuth=azimuth,
+    axis_tilt=axis_tilt,
+    axis_azimuth=axis_azimuth,
+    max_angle=max_angle,
+    backtrack=True,  # for true-tracking
+    gcr=GCR)  # irrelevant for true-tracking
+
+truetracking_angles['tracker_theta'] = truetracking_angles['tracker_theta'].fillna(0)
+
+diffuse_tracking = find_optimal_rotation_angle(GHI, DHI, DNI, DNI_extra, airmass, solpos, truetracking_angles['tracker_theta'], GCR, max_angle)
 
 # KPIs diffuse tracking
 
@@ -133,18 +165,9 @@ energy_yield_diffuse = (diffuse_tracking['POA global'].mean()/1000)*(diffuse_tra
 
 """ Comparison with true tracking """
 
-truetracking_angles = pvlib.tracking.singleaxis(
-    apparent_zenith=apparent_zenith,
-    apparent_azimuth=azimuth,
-    axis_tilt=axis_tilt,
-    axis_azimuth=axis_azimuth,
-    max_angle=max_angle,
-    backtrack=False,  # for true-tracking
-    gcr=GCR)  # irrelevant for true-tracking
-
 true_tracking = pd.DataFrame(data=None, index=GHI.index)
 true_tracking['tracker_theta'] = 0.0
-true_tracking['tracker_theta'] = truetracking_angles['tracker_theta'].fillna(0)
+true_tracking['tracker_theta'] = truetracking_angles['tracker_theta']
 true_tracking['POA global'] = 0.0
 true_tracking['degrees_moved'] = 0.0
 
@@ -190,7 +213,7 @@ energy_yield_astronomical = (true_tracking['POA global'].mean()/1000)*(true_trac
 
 """real_weather["GHI"].plot(title='Actual irradiance data', label="GHI")
 real_weather["DNI"].plot(title='Actual irradiance data', label="DNI")
-real_weather["DHI"].plot(title='Actual irradiance data', label="DHI")
+real_weather["DHI"].plot(title='Actual irradiance data', label="DHI")"""
 
 # Tracking curves & POA irradiance
 
@@ -207,6 +230,6 @@ axes[1].legend(title="Irradiance")
 
 
 plt.legend()
-plt.show()"""
+plt.show()
     
     
