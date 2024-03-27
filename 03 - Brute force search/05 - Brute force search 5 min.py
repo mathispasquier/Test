@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
-from math import cos, sin, atan, atan2, radians, degrees
+from math import cos, sin, acos, atan, atan2, radians, degrees, floor
 
 """ Input parameters"""
 
@@ -41,10 +41,11 @@ real_weather = real_weather.drop(['TmStamp'],axis=1)
 
 """ Select the days when to calculate via brute force search """
 
-begin = '2023-01-01 00:00:00'
-end = '2024-01-01 00:00:00'
+begin = '2023-06-01 00:00:00'
+end = '2023-06-02 00:00:00'
 
 real_weather = real_weather.loc[begin:end]
+real_weather = real_weather.resample('5min').first()
 
 """ Calculate the solar position for each time """
 
@@ -65,26 +66,52 @@ airmass = real_weather["airmass"]
 linketurbidity = pvlib.clearsky.lookup_linke_turbidity(real_weather.index, latitude, longitude)
 
 GHI = real_weather["GHI"] 
-DHI = real_weather["DHI"] 
+DHI = real_weather["DHI"]
 DNI = real_weather["DNI"] 
 
-""" Decomposition model
-The Erbs method, erbs() developed by Daryl Gregory Erbs at the University of Wisconsin in 1982 is a piecewise 
-correlation that splits kt into 3 regions: linear for kt <= 0.22, a 4th order polynomial between 0.22 < kt <= 0.8, 
-and a horizontal line for kt > 0.8. """
+""" Calculation of maximum angle due to backtracking """
 
-out_erbs = pvlib.irradiance.erbs(GHI, zenith, GHI.index)
+def find_max_angle_backtracking(truetracking_angles_backtracking, truetracking_angles_no_backtracking, max_angle):
 
-DHI_erbs = out_erbs["dhi"]
-DNI_erbs = out_erbs["dni"]
+    max_angle_backtracking = pd.DataFrame(data=None, index=truetracking_angles_backtracking.index)
+    max_angle_backtracking['angle'] = 0
+    
+    for i in range(truetracking_angles_backtracking.index.size):
+        
+        if truetracking_angles_backtracking['tracker_theta'].iloc[i] != truetracking_angles_no_backtracking['tracker_theta'].iloc[i]:
+            max_angle_backtracking['angle'].iloc[i] = floor(abs(truetracking_angles_backtracking['tracker_theta'].iloc[i]))
+        else:
+            max_angle_backtracking['angle'].iloc[i] = max_angle
+        
+    return max_angle_backtracking
 
-real_weather["DHI_erbs"] = DHI_erbs
-real_weather["DNI_erbs"] = DNI_erbs
+truetracking_angles_no_backtracking = pvlib.tracking.singleaxis(
+    apparent_zenith=apparent_zenith,
+    apparent_azimuth=azimuth,
+    axis_tilt=axis_tilt,
+    axis_azimuth=axis_azimuth,
+    max_angle=max_angle,
+    backtrack=False, 
+    gcr=GCR) 
+
+truetracking_angles = pvlib.tracking.singleaxis(
+    apparent_zenith=apparent_zenith,
+    apparent_azimuth=azimuth,
+    axis_tilt=axis_tilt,
+    axis_azimuth=axis_azimuth,
+    max_angle=max_angle,
+    backtrack=True, 
+    gcr=GCR)
+
+truetracking_angles_no_backtracking['tracker_theta'] = truetracking_angles_no_backtracking['tracker_theta'].fillna(0)
+truetracking_angles['tracker_theta'] = truetracking_angles['tracker_theta'].fillna(0)
+max_angle_backtracking = find_max_angle_backtracking(truetracking_angles, truetracking_angles_no_backtracking, max_angle)
+
 
 """ For each time, calculate optimal angle of rotation (with 2° resolution) that yields the maximum POA
 Use a transposition model to calculate POA irradiance from GHI, DNI and DHI """
 
-def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_position):
+def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_position, angle_backtracking, GCR, max_angle_backtracking):
     """
     Find the optimal rotation angle within given limits.
     """
@@ -94,12 +121,33 @@ def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_positio
     diffuse_tracking['degrees_moved'] = 0.0
     optimal_angle = 0
     previous_angle = 0
+
+    # distance between rows
+    axes_distance = 1/GCR
     
     for i in range(ghi.index.size):
         
         max_irradiance = 0
+        
+        """w_id = solar_position['apparent_zenith'].iloc[i]
+        s = 1/cos(w_id)
+        
+        if s > 1/GCR:
+            temp = pd.abs(axes_distance * cosd(w_id))
+            with np.errstate(invalid='ignore'):
+                w_c = np.degrees(-np.sign(w_id)*np.arccos(temp))
+            w_idc = w_id-w_c
+            #max_angle = int(w_idc)
 
-        for angle in range(-55,56,2):
+
+    
+        # NOTE: in the middle of the day, arccos(temp) is out of range because
+        # there's no row-to-row shade to avoid, & backtracking is unnecessary
+        # [1], Eqs. 15-16
+        with np.errstate(invalid='ignore'):
+            tracker_theta = wid + np.where(temp < 1, wc, 0)"""
+        
+        for angle in range(-max_angle_backtracking['angle'].iloc[i],max_angle_backtracking['angle'].iloc[i],1):
             
             if angle < 0:
                 surface_azimuth = 90 
@@ -135,8 +183,7 @@ def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_positio
     
     return diffuse_tracking
 
-diffuse_tracking = find_optimal_rotation_angle(GHI, DHI, DNI, DNI_extra, airmass, solpos)
-diffuse_tracking_erbs = find_optimal_rotation_angle(GHI, DHI_erbs, DNI_erbs, DNI_extra, airmass, solpos)
+diffuse_tracking = find_optimal_rotation_angle(GHI, DHI, DNI, DNI_extra, airmass, solpos, truetracking_angles['tracker_theta'], GCR, max_angle_backtracking)
 
 # KPIs diffuse tracking
 
@@ -145,27 +192,11 @@ delta_t_diffuse = total_degrees_diffuse/w # Total time (in s) during which the t
 consumption_tracker_diffuse = U*I*delta_t_diffuse/3600000 # in kWh
 energy_yield_diffuse = (diffuse_tracking['POA global'].mean()/1000)*(diffuse_tracking.index.size/60) # Average POA irradiance in kW * number of hours
 
-total_degrees_diffuse_erbs = diffuse_tracking_erbs['degrees_moved'].sum()
-delta_t_diffuse_erbs = total_degrees_diffuse_erbs/w # Total time (in s) during which the tracker moved
-consumption_tracker_diffuse_erbs = U*I*delta_t_diffuse_erbs/3600000 # in kWh
-energy_yield_diffuse_erbs = (diffuse_tracking_erbs['POA global'].mean()/1000)*(diffuse_tracking_erbs.index.size/60) # Average POA irradiance in kW * number of hours
-
 """ Comparison with true tracking """
-
-truetracking_angles = pvlib.tracking.singleaxis(
-    apparent_zenith=apparent_zenith,
-    apparent_azimuth=azimuth,
-    axis_tilt=axis_tilt,
-    axis_azimuth=axis_azimuth,
-    max_angle=max_angle,
-    backtrack=False,  # for true-tracking
-    gcr=GCR)  # irrelevant for true-tracking
-
-# Calculation of POA irradiance for true tracking
 
 true_tracking = pd.DataFrame(data=None, index=GHI.index)
 true_tracking['tracker_theta'] = 0.0
-true_tracking['tracker_theta'] = truetracking_angles['tracker_theta'].fillna(0)
+true_tracking['tracker_theta'] = truetracking_angles['tracker_theta']
 true_tracking['POA global'] = 0.0
 true_tracking['degrees_moved'] = 0.0
 
@@ -209,11 +240,9 @@ energy_yield_astronomical = (true_tracking['POA global'].mean()/1000)*(true_trac
 
 # Irradiance GHI, DNI, DHI
 
-"""GHI.plot(title='Actual irradiance data', label="GHI")
-DNI.plot(title='Actual irradiance data', label="DNI")
-#DHI.plot(title='Actual irradiance data', label="DHI")
-DNI_erbs.plot(title='Actual irradiance data', label="DNI Erbs", linestyle='--')
-#DHI_erbs.plot(title='Actual irradiance data', label="DHI Erbs")
+"""real_weather["GHI"].plot(title='Actual irradiance data', label="GHI")
+real_weather["DNI"].plot(title='Actual irradiance data', label="DNI")
+real_weather["DHI"].plot(title='Actual irradiance data', label="DHI")"""
 
 # Tracking curves & POA irradiance
 
@@ -230,6 +259,6 @@ axes[1].legend(title="Irradiance")
 
 
 plt.legend()
-plt.show()"""
+plt.show()
     
     
