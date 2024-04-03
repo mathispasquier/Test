@@ -40,7 +40,7 @@ w = w_min/60 # Tracker rotation speed, in degrees/second
 
 # Data parameters
 
-resolution = 5 # tracker optimization resolution in minutes, if needed
+resolution = 15 # tracker optimization resolution in minutes, if needed
 
 """ Get weather data (real data from .csv file) """
 
