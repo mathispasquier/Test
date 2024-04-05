@@ -209,7 +209,7 @@ def calculate_degrees_moved(tracking, tracking_angle):
         previous_angle = angle
 
 
-def calculate_POA_transposition(tracking, tracking_angle):
+def calculate_POA_transposition(tracking, tracking_angle, ghi, dhi, dni, dni_extra, airmass, solar_position):
     
     """
     Calculate the POA irradiance
@@ -230,13 +230,13 @@ def calculate_POA_transposition(tracking, tracking_angle):
 
         total_irrad = pvlib.irradiance.get_total_irradiance(surface_tilt=angle_abs, 
                                                             surface_azimuth=surface_azimuth, 
-                                                            dni=real_weather["DNI"].iloc[i], 
-                                                            ghi=real_weather["GHI"].iloc[i], 
-                                                            dhi=real_weather["DHI"].iloc[i], 
-                                                            solar_zenith=solpos['apparent_zenith'].iloc[i], 
-                                                            solar_azimuth=solpos['azimuth'].iloc[i],
-                                                            dni_extra=real_weather["DNI_extra"].iloc[i],
-                                                            airmass=real_weather["airmass"].iloc[i],
+                                                            dni=dni.iloc[i], 
+                                                            ghi=ghi.iloc[i], 
+                                                            dhi=dhi.iloc[i], 
+                                                            solar_zenith=solar_position['apparent_zenith'].iloc[i], 
+                                                            solar_azimuth=solar_position['azimuth'].iloc[i],
+                                                            dni_extra=dni_extra.iloc[i],
+                                                            airmass=airmass.iloc[i],
                                                             model='perez',
                                                             model_perez='allsitescomposite1990')
         
@@ -247,7 +247,7 @@ calculate_POA_transposition(brute_force_search, brute_force_search['angle'])
 calculate_degrees_moved(brute_force_search, brute_force_search['angle'])
 
 brute_force_search_resamp = find_optimal_rotation_angle(GHI_resamp, DHI_resamp, DNI_resamp, DNI_extra_resamp, airmass_resamp, solpos_resamp, GCR, max_angle_backtracking_resamp, w_min, resolution)
-calculate_POA_transposition(brute_force_search_resamp, brute_force_search_resamp['angle'])
+calculate_POA_transposition(brute_force_search_resamp, brute_force_search_resamp['angle'], GHI_resamp, DHI_resamp, DNI_resamp, DNI_extra_resamp, airmass_resamp, solpos_resamp)
 calculate_degrees_moved(brute_force_search_resamp, brute_force_search_resamp['angle'])
 
 """ Extending the resampled brute force search tracking angles to the whole time index """
@@ -402,20 +402,25 @@ KPIs_brute_force_search_resamp = KPIs(brute_force_search_resamp, w, resolution)
 KPIs_brute_force_search_extended = KPIs(brute_force_search_extended, w, resolution)
 KPIs_astronomical = KPIs(astronomical_tracking, w, resolution)
 
+
+
+
 """ Plot data """
 
 # Tracking curves & POA irradiance
 
 fig, axes = plt.subplots(nrows=2, ncols=1, sharex=True)
 
-#brute_force_search['angle'].plot(title='Tracking Curve', label="Optimal tracking", ax=axes[0])
-brute_force_search_infinite_speed['angle'].plot(title='Tracking Curve', label="Optimal tracking - infinite tracker speed", ax=axes[0])
+brute_force_search['angle'].plot(title='Tracking Curve', label="Optimal tracking - limited tracker speed", ax=axes[0])
+#brute_force_search_infinite_speed['angle'].plot(title='Tracking Curve', label="Optimal tracking - infinite tracker speed", ax=axes[0])
 brute_force_search_TeraBase['angle'].plot(title='Tracking Curve', label="Optimal tracking - TeraBase model", ax=axes[0])
-#brute_force_search_extended['angle'].plot(title='Tracking Curve', label="Optimal tracking extended", ax=axes[0])
+#['angle'].plot(title='Tracking Curve', label="Optimal tracking - extended from another resolution", ax=axes[0])
 astronomical_tracking['angle'].plot(title='Tracking Curve', label="Astronomical tracking",ax=axes[0])
 
-brute_force_search['POA global'].plot(title='Irradiance', label="POA brute force search tracking", ax=axes[1])
-brute_force_search_extended['POA global'].plot(title='Irradiance', label="POA brute force search tracking extended", ax=axes[1])
+brute_force_search['POA global'].plot(title='Irradiance', label="POA brute force search - limited tracker speed", ax=axes[1])
+#brute_force_search_infinite_speed['POA global'].plot(title='Irradiance', label="POA brute force search - infinite tracker speed", ax=axes[1])
+brute_force_search_TeraBase['POA global'].plot(title='Irradiance', label="POA brute force search - TeraBase model", ax=axes[1])
+#brute_force_search_extended['POA global'].plot(title='Irradiance', label="POA brute force search - extended from another resolution", ax=axes[1])
 #astronomical_tracking["POA global"].plot(title='Irradiance', label="POA astronomical tracking", ax=axes[1])
 
 axes[0].legend(title="Tracker Tilt")
