@@ -52,8 +52,8 @@ real_weather = real_weather.drop(['TmStamp'],axis=1)
 
 """ Select the days when to calculate via brute force search """
 
-begin = '2023-06-01 00:00:00'
-end = '2023-06-02 00:00:00'
+begin = '2023-12-16 00:00:00'
+end = '2023-12-22 00:00:00'
 
 real_weather = real_weather.loc[begin:end]
 
@@ -243,7 +243,7 @@ def calculate_POA_transposition(tracking, tracking_angle, ghi, dhi, dni, dni_ext
         tracking['POA global'].iloc[i] = total_irrad["poa_global"]
 
 brute_force_search = find_optimal_rotation_angle(GHI, DHI, DNI, DNI_extra, airmass, solpos, GCR, max_angle_backtracking, w_min, 1)
-calculate_POA_transposition(brute_force_search, brute_force_search['angle'])
+calculate_POA_transposition(brute_force_search, brute_force_search['angle'], GHI, DHI, DNI, DNI_extra, airmass, solpos)
 calculate_degrees_moved(brute_force_search, brute_force_search['angle'])
 
 brute_force_search_resamp = find_optimal_rotation_angle(GHI_resamp, DHI_resamp, DNI_resamp, DNI_extra_resamp, airmass_resamp, solpos_resamp, GCR, max_angle_backtracking_resamp, w_min, resolution)
@@ -339,7 +339,7 @@ def extend_rotation_angle(brute_force_search_resamp, ghi, dhi, dni, dni_extra, a
     return brute_force_search
             
 brute_force_search_extended = extend_rotation_angle(brute_force_search_resamp, GHI, DHI, DNI, DNI_extra, airmass, solpos, max_angle_backtracking, w_min, resolution)
-calculate_POA_transposition(brute_force_search_extended, brute_force_search_extended['angle'])
+calculate_POA_transposition(brute_force_search_extended, brute_force_search_extended['angle'], GHI, DHI, DNI, DNI_extra, airmass, solpos)
 calculate_degrees_moved(brute_force_search_extended, brute_force_search_extended['angle'])
 
 """ Comparison with astronomical tracking """
@@ -349,7 +349,7 @@ astronomical_tracking['angle'] = astronomical_tracking_angles['tracker_theta'].r
 
 # Calculate POA irradiance & degrees moved for astronomical tracking
 
-calculate_POA_transposition(astronomical_tracking, astronomical_tracking['angle'])
+calculate_POA_transposition(astronomical_tracking, astronomical_tracking['angle'], GHI, DHI, DNI, DNI_extra, airmass, solpos)
 calculate_degrees_moved(astronomical_tracking, astronomical_tracking['angle'])
 
 """ Implementing the TeraBase model """
@@ -373,13 +373,13 @@ def TeraBase(astronomical_angle, brute_force_search_angle, hesitation_factor, w_
 # Calculation of the ideal angle with no constraints on the tracker movement (i.e. infinite tracker speed)
 
 brute_force_search_infinite_speed = find_optimal_rotation_angle(GHI, DHI, DNI, DNI_extra, airmass, solpos, GCR, max_angle_backtracking, 2*max_angle, 1)
-calculate_POA_transposition(brute_force_search_infinite_speed, brute_force_search_infinite_speed['angle'])
+calculate_POA_transposition(brute_force_search_infinite_speed, brute_force_search_infinite_speed['angle'], GHI, DHI, DNI, DNI_extra, airmass, solpos)
 calculate_degrees_moved(brute_force_search_infinite_speed, brute_force_search_infinite_speed['angle'])
 
 # Calculation of the rotation angle using the TeraBase model
 
-brute_force_search_TeraBase = TeraBase(astronomical_tracking['angle'], brute_force_search_infinite_speed['angle'], eta, w_min, 1)
-calculate_POA_transposition(brute_force_search_TeraBase, brute_force_search_TeraBase['angle'])
+brute_force_search_TeraBase = TeraBase(astronomical_tracking['angle'], brute_force_search['angle'], eta, w_min, 1)
+calculate_POA_transposition(brute_force_search_TeraBase, brute_force_search_TeraBase['angle'], GHI, DHI, DNI, DNI_extra, airmass, solpos)
 calculate_degrees_moved(brute_force_search_TeraBase, brute_force_search_TeraBase['angle'])
 
 """ Calculation of KPIs for tracking """
@@ -397,10 +397,12 @@ def KPIs(tracking, w, resolution):
     
     return (total_degrees_moved, delta_t_moved, consumption_tracker, energy_yield)
 
-KPIs_brute_force_search = KPIs(brute_force_search, w, resolution)
+KPIs_brute_force_search = KPIs(brute_force_search, w, 1)
+KPIs_brute_force_search_infinite_speed = KPIs(brute_force_search_infinite_speed, w, 1)
 KPIs_brute_force_search_resamp = KPIs(brute_force_search_resamp, w, resolution)
-KPIs_brute_force_search_extended = KPIs(brute_force_search_extended, w, resolution)
-KPIs_astronomical = KPIs(astronomical_tracking, w, resolution)
+KPIs_brute_force_search_extended = KPIs(brute_force_search_extended, w, 1)
+KPIs_brute_force_search_TeraBase = KPIs(brute_force_search_TeraBase, w, 1)
+KPIs_astronomical = KPIs(astronomical_tracking, w, 1)
 
 
 
@@ -414,18 +416,19 @@ fig, axes = plt.subplots(nrows=2, ncols=1, sharex=True)
 brute_force_search['angle'].plot(title='Tracking Curve', label="Optimal tracking - limited tracker speed", ax=axes[0])
 #brute_force_search_infinite_speed['angle'].plot(title='Tracking Curve', label="Optimal tracking - infinite tracker speed", ax=axes[0])
 brute_force_search_TeraBase['angle'].plot(title='Tracking Curve', label="Optimal tracking - TeraBase model", ax=axes[0])
-#['angle'].plot(title='Tracking Curve', label="Optimal tracking - extended from another resolution", ax=axes[0])
+#brute_force_search_extended['angle'].plot(title='Tracking Curve', label="Optimal tracking - extended from another resolution", ax=axes[0])
 astronomical_tracking['angle'].plot(title='Tracking Curve', label="Astronomical tracking",ax=axes[0])
 
 brute_force_search['POA global'].plot(title='Irradiance', label="POA brute force search - limited tracker speed", ax=axes[1])
 #brute_force_search_infinite_speed['POA global'].plot(title='Irradiance', label="POA brute force search - infinite tracker speed", ax=axes[1])
 brute_force_search_TeraBase['POA global'].plot(title='Irradiance', label="POA brute force search - TeraBase model", ax=axes[1])
 #brute_force_search_extended['POA global'].plot(title='Irradiance', label="POA brute force search - extended from another resolution", ax=axes[1])
-#astronomical_tracking["POA global"].plot(title='Irradiance', label="POA astronomical tracking", ax=axes[1])
+astronomical_tracking["POA global"].plot(title='Irradiance', label="POA astronomical tracking", ax=axes[1])
+#brute_force_search_infinite_speed['angle'].plot(title='Optimal tracking - infinite tracker speed', legend = 'Angle', ax=axes[1])
 
 axes[0].legend(title="Tracker Tilt")
 axes[1].legend(title="Irradiance")
 
-
 plt.legend()
 plt.show()
+
