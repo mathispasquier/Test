@@ -52,8 +52,8 @@ real_weather = real_weather.drop(['TmStamp'],axis=1)
 
 """ Select the days when to calculate via brute force search """
 
-begin = '2023-06-01 00:00:00'
-end = '2023-06-01 00:00:00'
+begin = '2023-12-16 00:00:00'
+end = '2023-12-22 00:00:00'
 
 real_weather = real_weather.loc[begin:end]
 
@@ -191,6 +191,8 @@ def find_optimal_rotation_angle(ghi, dhi, dni, dni_extra, airmass, solar_positio
         previous_angle = optimal_angle
     
     return brute_force_search
+
+
 
 def calculate_degrees_moved(tracking, tracking_angle):
     
@@ -408,7 +410,7 @@ KPIs_astronomical = KPIs(astronomical_tracking, w, 1)
 
 
 """ Plot data """
-"""
+
 # Tracking curves & POA irradiance
 
 fig, axes = plt.subplots(nrows=2, ncols=1, sharex=True)
@@ -430,5 +432,5 @@ axes[0].legend(title="Tracker Tilt")
 axes[1].legend(title="Irradiance")
 
 plt.legend()
-plt.show()"""
+plt.show()
 
