@@ -186,7 +186,7 @@ def model_brute_force_search(weather, solar_position, max_angle_backtracking, w_
     Calculates the optimized tracker rotation angle using the brute force search model. 
     For all the possible angles of rotation, a transposition model (e.g. Perez model) calculates the associated POA irradiance. 
     The angle that maximizes the POA irradiance is the optimized tracker rotation angle.
-    From its previous position, the tracker can only move by +/- its rotation speed.
+    From its previous position, the tracker can only move by +/- its rotation speed*resolution.
     
     Parameters
     ----------
@@ -586,7 +586,7 @@ calculate_degrees_moved(binary_mode)
 def TeraBase(astronomical_tracking, tracking, hesitation_factor, w_min, resolution=1):
     """
     The TeraBase model calculates a corrected tracker rotation angle between the astronomical angle and the optimal tracker rotation angle (calculated with a model).
-    The calculations takes into account a movement penalty, which represents the amount of time a tracker must spend in transit from the previous rotation angle to the current rotation angle and is a percentage of the total amount of time encompassed by that timestamp.
+    The calculations takes into account a movement penalty, which represeOnts the amount of time a tracker must spend in transit from the previous rotation angle to the current rotation angle and is a percentage of the total amount of time encompassed by that timestamp.
     The hesitation factor is an empirical term which represents controls hesitancy to go to the optimal tracker rotation angle.
 
     Parameters
