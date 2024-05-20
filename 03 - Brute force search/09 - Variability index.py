@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
-from math import cos, sin, atan, radians, degrees, floor, sqrt
+from math import cos, sin, atan, radians, degrees, floor, sqrt, isnan
 
 """ Input parameters"""
 
@@ -40,7 +40,7 @@ eta = 0.4 # Hesitation factor for the TeraBase model
 
 # Data source: the file should contain 1 column with datetimes, 1 column with 'GHI' measurements and (if applicable) 1 column with 'DHI' measurements and 1 column with 'DNI' measurements
 
-filename = 'C:/Users/mpa/OneDrive - EE/Documents/GitHub/Thesis-code/03 - Brute force search/Risø Data formatted_2.csv' # Name and path for the data file
+filename = r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Risø Data formatted.csv' # Name and path for the data file
 filedate_beginning = '2023-01-01' # Beginning date in the data file
 filedate_end = '2024-01-01' # End date in the data file
 dataresolution = '1min' # Time step in the data file (or data frequency to use)
@@ -66,12 +66,12 @@ Pnom_module = 650 #  Module nominal power, in watts
 
 # Simulation parameters
 
-begin = '2023-06-01 00:00:00' # Beginning date for the simulation
-end = '2023-06-02 00:00:00' # End date for the simulation
-resolution = 5 # Tracker optimization resolution in minutes (if needed)
+begin = '2023-01-01 00:00:00' # Beginning date for the simulation
+end = '2024-01-01 00:00:00' # End date for the simulation
+resolution = 15 # Tracker optimization resolution in minutes (if needed)
 decomposition = False # Whether a decomposition model should be used or not
 clearskymodel = False # Whether a clear sky model should be used or not
-threshold_VI = 10 # Value for the variability index that corresponds to an hesitation factor of 1 in the TeraBase model
+threshold_VI = 40 # Value for the variability index that corresponds to an hesitation factor of 1 in the TeraBase model
 
 """ Getting irradiance data from a data source or calculating irradiance data using a model """
 
@@ -362,8 +362,9 @@ def model_binary_mode(astronomical_tracking, weather, solar_position):
     
     binary_mode = pd.DataFrame(data=None, index=weather.index)
     binary_mode['angle'] = 0
-    
+    print(binary_mode)
     astronomical_tracking_copy = astronomical_tracking.copy()
+    print(astronomical_tracking_copy)
     calculate_POA_transposition(astronomical_tracking_copy, weather, solar_position)
     
     for i in range(weather.index.size):
@@ -396,7 +397,8 @@ def calculate_POA_transposition(tracking, weather, solar_position):
     tracking['POA global'] = 0.0
     
     for i in range(tracking.index.size):
-        
+        print('i')
+        print(i)
         angle = tracking['angle'].iloc[i]
             
         if angle < 0:
@@ -405,7 +407,7 @@ def calculate_POA_transposition(tracking, weather, solar_position):
         else:
             surface_azimuth = 270
             angle_abs = angle
-        
+        print(angle)
         if angle == 0:
             tracking.loc[tracking.index[i],'POA global'] = weather['GHI'].iloc[i]
         else:
@@ -420,7 +422,8 @@ def calculate_POA_transposition(tracking, weather, solar_position):
                                                                 airmass=weather['airmass'].iloc[i],
                                                                 model='perez',
                                                                 model_perez='allsitescomposite1990')
-            tracking.loc[tracking.index[i], 'POA global'] = total_irrad['poa_global']
+            print(total_irrad['poa_global'])
+            tracking.loc[tracking.index[i], 'POA global'] = 0 if isnan(total_irrad['poa_global']) else total_irrad['poa_global']
 
 """ Extending the resampled brute force search tracking angles to the whole time index """
             
@@ -715,35 +718,35 @@ IDEAL_astronomical_tracking['angle'] = astronomical_tracking_angles['tracker_the
 calculate_POA_transposition(IDEAL_astronomical_tracking, weather, solpos)
 calculate_degrees_moved(IDEAL_astronomical_tracking)
 KPIs_IDEAL_astronomical_tracking = KPIs(weather, IDEAL_astronomical_tracking, w_min, module_params, modules_in_series, module_type, Pnom_module)
-
+print('Ideal astronomical')
 'Brute force search [infinite tracker speed]'
 
 IDEAL_brute_force_search_infinite_speed = model_brute_force_search(weather, solpos, max_angle_backtracking, 2*max_angle)
 calculate_POA_transposition(IDEAL_brute_force_search_infinite_speed, weather, solpos)
 calculate_degrees_moved(IDEAL_brute_force_search_infinite_speed)
 KPIs_IDEAL_brute_force_search_infinite_speed = KPIs(weather, IDEAL_brute_force_search_infinite_speed, w_min, module_params, modules_in_series, module_type, Pnom_module)
-
+print('Ideal brute force infinite')
 'Brute force search [limited tracker speed]'
 
 IDEAL_brute_force_search_limited_speed = model_brute_force_search(weather, solpos, max_angle_backtracking, w_min)
 calculate_POA_transposition(IDEAL_brute_force_search_limited_speed, weather, solpos)
 calculate_degrees_moved(IDEAL_brute_force_search_limited_speed)
 KPIs_IDEAL_brute_force_search_limited_speed = KPIs(weather, IDEAL_brute_force_search_limited_speed, w_min, module_params, modules_in_series, module_type, Pnom_module)
-
+print('Ideal brute force limited')
 'CENER model'
 
 IDEAL_CENER = model_CENER(weather, solpos, axis_azimuth, albedo, max_angle_backtracking)
 calculate_POA_transposition(IDEAL_CENER, weather, solpos)
 calculate_degrees_moved(IDEAL_CENER)
 KPIs_IDEAL_CENER = KPIs(weather, IDEAL_CENER, w_min, module_params, modules_in_series, module_type, Pnom_module)
-
+print('Ideal CENER')
 'Binary model'
 
 IDEAL_binary_mode = model_binary_mode(IDEAL_astronomical_tracking, weather, solpos)
 calculate_POA_transposition(IDEAL_binary_mode, weather, solpos)
 calculate_degrees_moved(IDEAL_binary_mode)
 KPIs_IDEAL_binary_mode = KPIs(weather, IDEAL_binary_mode, w_min, module_params, modules_in_series, module_type, Pnom_module)
-
+print('Ideal binary')
 """ Real time """
 
 'Astronomical tracking'
@@ -769,7 +772,7 @@ for i in range(1, REAL_TIME_astronomical_tracking.index.size):
 calculate_POA_transposition(REAL_TIME_astronomical_tracking, weather, solpos)
 calculate_degrees_moved(REAL_TIME_astronomical_tracking)
 KPIs_IDEAL_astronomical_tracking = KPIs(weather, REAL_TIME_astronomical_tracking, w_min, module_params, modules_in_series, module_type, Pnom_module)      
-  
+print('Real astronomical')  
 'Resample data using the relevant resolution'
 
 resamp = str(resolution)+'min'
@@ -787,7 +790,7 @@ REAL_TIME_brute_force_search_extended = extend_rotation_angle_real_time(brute_fo
 calculate_POA_transposition(REAL_TIME_brute_force_search_extended, weather, solpos)
 calculate_degrees_moved(REAL_TIME_brute_force_search_extended)
 KPIs_REAL_TIME_brute_force_search_extended = KPIs(weather, REAL_TIME_brute_force_search_extended, w_min, module_params, modules_in_series, module_type, Pnom_module)
-
+print('Real brute force limited')
 # Using the TeraBase model & variability factor with brute force search
 
 REAL_TIME_TERABASE_brute_force_search_resamp = TeraBase(IDEAL_astronomical_tracking_resamp, brute_force_search_resamp, weather_resamp, w_min, threshold_VI, resolution)
@@ -795,7 +798,7 @@ REAL_TIME_TERABASE_brute_force_search_extended = extend_rotation_angle_real_time
 calculate_POA_transposition(REAL_TIME_TERABASE_brute_force_search_extended, weather, solpos)
 calculate_degrees_moved(REAL_TIME_TERABASE_brute_force_search_extended)
 KPIs_REAL_TIME_TERABASE_brute_force_search_extended = KPIs(weather, REAL_TIME_brute_force_search_extended, w_min, module_params, modules_in_series, module_type, Pnom_module)
-
+print('Real brute force limited TeraBase')
 'CENER model'
 
 if resolution*w_min >= 2*max_angle:
@@ -805,11 +808,11 @@ if resolution*w_min >= 2*max_angle:
     REAL_TIME_CENER_extended = extend_rotation_angle_real_time(CENER_resamp, resolution, weather.index, max_angle_backtracking)
     calculate_POA_transposition(REAL_TIME_CENER_extended, weather, solpos)
     calculate_degrees_moved(REAL_TIME_CENER_extended)
-    KPIs_REAL_TIME_CENER_extended = KPIs(weather, REAL_TIME_CENER_extended, w_min, module_params, modules_in_series, module_type, Pnom_module)
+    #KPIs_REAL_TIME_CENER_extended = KPIs(weather, REAL_TIME_CENER_extended, w_min, module_params, modules_in_series, module_type, Pnom_module)
 
 else:
       REAL_TIME_CENER_extended = "Calculation impossible for this resolution" 
-
+print('Real CENER')
 'Binary model'
 
 if resolution*w_min >= 2*max_angle:
@@ -823,7 +826,7 @@ if resolution*w_min >= 2*max_angle:
 
 else:
       REAL_TIME_binary_mode_extended = "Calculation impossible for this resolution" 
-      
+print('Real binary')    
 """ Forecast """
 
 'Brute force search [limited tracker speed]'
@@ -832,7 +835,7 @@ FORECAST_brute_force_search_extended = extend_rotation_angle_forecast(brute_forc
 calculate_POA_transposition(FORECAST_brute_force_search_extended, weather, solpos)
 calculate_degrees_moved(FORECAST_brute_force_search_extended)
 KPIs_FORECAST_brute_force_search_extended = KPIs(weather, FORECAST_brute_force_search_extended, w_min, module_params, modules_in_series, module_type, Pnom_module)
-
+print('Forecast brute force limited')
 'CENER model'
 
 if resolution*w_min >= 2*max_angle:
@@ -842,11 +845,11 @@ if resolution*w_min >= 2*max_angle:
     FORECAST_CENER_extended = extend_rotation_angle_forecast(CENER_resamp, resolution, weather.index, max_angle_backtracking)
     calculate_POA_transposition(FORECAST_CENER_extended, weather, solpos)
     calculate_degrees_moved(FORECAST_CENER_extended)
-    KPIs_FORECAST_CENER_extended = KPIs(weather, FORECAST_CENER_extended, w_min, module_params, modules_in_series, module_type, Pnom_module)
+    #KPIs_FORECAST_CENER_extended = KPIs(weather, FORECAST_CENER_extended, w_min, module_params, modules_in_series, module_type, Pnom_module)
 
 else:
       FORECAST_CENER_extended = "Calculation impossible for this resolution" 
-      
+print('Forecast CENER')
 'Binary model'
 
 if resolution*w_min >= 2*max_angle:
@@ -856,16 +859,36 @@ if resolution*w_min >= 2*max_angle:
     FORECAST_binary_mode_extended = extend_rotation_angle_forecast(Binary_resamp, resolution, weather.index, max_angle_backtracking)
     calculate_POA_transposition(FORECAST_binary_mode_extended, weather, solpos)
     calculate_degrees_moved(FORECAST_binary_mode_extended)
-    KPIs_FORECAST_binary_mode_extended = KPIs(weather, FORECAST_binary_mode_extended, w_min, module_params, modules_in_series, module_type, Pnom_module)
+    #KPIs_FORECAST_binary_mode_extended = KPIs(weather, FORECAST_binary_mode_extended, w_min, module_params, modules_in_series, module_type, Pnom_module)
 
 else:
       FORECAST_binary_mode_extended = "Calculation impossible for this resolution" 
-      
+print('Forecast binary')
+  
+""" Writing in files """
+
+# IDEAL_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Ideal\Astronomical tracking',index=True,mode='w')
+# IDEAL_binary_mode.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Ideal\Binary mode',index=True,mode='w')
+# IDEAL_brute_force_search_infinite_speed.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Ideal\Brute force search infinite speed',index=True,mode='w')
+# IDEAL_brute_force_search_limited_speed.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Ideal\Brute force search limited speed',index=True,mode='w')
+# IDEAL_CENER.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Ideal\CENER',index=True,mode='w')
+    
+# REAL_TIME_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Real time\Astronomical tracking',index=True,mode='w')
+# REAL_TIME_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Real time\Binary mode extended',index=True,mode='w')
+# REAL_TIME_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Real time\Brute force search limited speed extended',index=True,mode='w')
+# REAL_TIME_TERABASE_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Real time\Brute force search limited speed & TeraBase extended',index=True,mode='w')
+# REAL_TIME_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Real time\CENER extended',index=True,mode='w')
+
+# FORECAST_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Forecast\Binary mode',index=True,mode='w')
+# FORECAST_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Forecast\Brute force search limited speed',index=True,mode='w')
+# FORECAST_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Forecast\CENER extended',index=True,mode='w')     
+   
+    
 """ Plot data """
 
 # Tracking curves & POA irradiance
 
-fig, axes = plt.subplots(nrows=3, ncols=1, sharex=False)
+# fig, axes = plt.subplots(nrows=3, ncols=1, sharex=False)
 
 'Ideal case'
 
@@ -883,15 +906,15 @@ fig, axes = plt.subplots(nrows=3, ncols=1, sharex=False)
 
 'Real time'
 
-REAL_TIME_astronomical_tracking['angle'].plot(title='Tracking Curve', label="Real time astronomical tracking",ax=axes[0], color='green')
-REAL_TIME_brute_force_search_extended['angle'].plot(title='Tracking Curve', label="Real time brute force search", ax=axes[0], color='purple')
-REAL_TIME_TERABASE_brute_force_search_extended['angle'].plot(title='Tracking Curve', label="Real time brute force search TeraBase", ax=axes[0], color='purple', linestyle='dotted')
+# REAL_TIME_astronomical_tracking['angle'].plot(title='Tracking Curve', label="Real time astronomical tracking",ax=axes[0], color='green')
+# REAL_TIME_brute_force_search_extended['angle'].plot(title='Tracking Curve', label="Real time brute force search", ax=axes[0], color='purple')
+# REAL_TIME_TERABASE_brute_force_search_extended['angle'].plot(title='Tracking Curve', label="Real time brute force search TeraBase", ax=axes[0], color='purple', linestyle='dotted')
 # REAL_TIME_CENER_extended['angle'].plot(title='Tracking Curve', label="Real time CENER",ax=axes[0], color='red')
 # REAL_TIME_binary_mode_extended['angle'].plot(title='Tracking Curve', label="Real time binary mode - either astronomical angle or 0",ax=axes[0], color='black')
 
-REAL_TIME_astronomical_tracking['POA global'].plot(title='Irradiance', label="POA Real time astronomical tracking", ax=axes[1], color='green')
-REAL_TIME_brute_force_search_extended['POA global'].plot(title='Irradiance', label="POA Real time brute force search", ax=axes[1], color='purple')
-REAL_TIME_TERABASE_brute_force_search_extended['POA global'].plot(title='Irradiance', label="POA Real time brute force search TeraBase", ax=axes[1], color='purple', linestyle='dotted')
+# REAL_TIME_astronomical_tracking['POA global'].plot(title='Irradiance', label="POA Real time astronomical tracking", ax=axes[1], color='green')
+# REAL_TIME_brute_force_search_extended['POA global'].plot(title='Irradiance', label="POA Real time brute force search", ax=axes[1], color='purple')
+# REAL_TIME_TERABASE_brute_force_search_extended['POA global'].plot(title='Irradiance', label="POA Real time brute force search TeraBase", ax=axes[1], color='purple', linestyle='dotted')
 # REAL_TIME_CENER_extended['POA global'].plot(title='Irradiance', label="POA Real time CENER", ax=axes[1], color='red')
 # REAL_TIME_binary_mode_extended['POA global'].plot(title='Irradiance', label="POA Real time binary mode", ax=axes[1], color='black')
 
@@ -907,22 +930,45 @@ REAL_TIME_TERABASE_brute_force_search_extended['POA global'].plot(title='Irradia
 
 'Weather data'
 
-weather['GHI'].plot(title='Irradiance', label="GHI", ax=axes[2], color='blue')
-weather['DHI'].plot(title='Irradiance', label="DHI", ax=axes[2], color='orange')
-weather['DNI'].plot(title='Irradiance', label="DNI", ax=axes[2], color='green')
-ax2 = axes[2].twinx()
-weather['Variability GHI'].plot(title='Irradiance', label="Variability", ax=ax2, color='black')
+# weather['GHI'].plot(title='Irradiance', label="GHI", ax=axes[2], color='blue')
+# weather['DHI'].plot(title='Irradiance', label="DHI", ax=axes[2], color='orange')
+# weather['DNI'].plot(title='Irradiance', label="DNI", ax=axes[2], color='green')
+# ax2 = axes[2].twinx()
+# weather['Variability GHI'].plot(title='Irradiance', label="Variability", ax=ax2, color='black')
 
-axes[0].legend(title="Tracker Tilt")
-axes[1].legend(title="POA Irradiance")
-axes[2].legend(title="Irradiance")
-axes[2].set_ylabel("Irradiance (W/m2)")
-ax2.set_ylabel("Variability factor")
+# axes[0].legend(title="Tracker Tilt")
+# axes[1].legend(title="POA Irradiance")
+# axes[2].legend(title="Irradiance")
+# axes[2].set_ylabel("Irradiance (W/m2)")
+# ax2.set_ylabel("Variability factor")
 
-axes[0].grid()
-axes[1].grid()
-axes[2].grid()
+# axes[0].grid()
+# axes[1].grid()
+# axes[2].grid()
 
-plt.legend()
-plt.show()
+# plt.legend()
+# plt.show()
+
+# tracking = IDEAL_astronomical_tracking
+# total_degrees_moved = tracking['degrees_moved'].sum() 
+
+# energy_produced = 0
+# temp_params = pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['sapm'][module_type]
+
+# for i in range(tracking.index.size):
+#     effective_irradiance = tracking['POA global'].iloc[i]
+    
+#     # Calculate module cell temperature with the Sandia Thermal Model
+#     temp_cell = pvlib.temperature.sapm_cell(effective_irradiance, 10, 0, **temp_params)
+    
+#     # Calculate array effective DC power output
+#     iv_params = pvlib.pvsystem.calcparams_pvsyst(effective_irradiance, temp_cell, **module_params)
+#     Pmax_dc_module = pvlib.pvsystem.max_power_point(*iv_params)['p_mp']
+#     Pmax_dc_array = Pmax_dc_module*modules_in_series
+    
+#     energy_produced += Pmax_dc_array/60/1000
+
+
+
+
 
