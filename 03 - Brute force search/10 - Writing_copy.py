@@ -38,7 +38,7 @@ w_min = 9 # Tracker rotation speed, in degrees/minute
 
 # Data source: the file should contain 1 column with datetimes, 1 column with 'GHI' measurements and (if applicable) 1 column with 'DHI' measurements and 1 column with 'DNI' measurements
 
-filename = r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Risø Data formatted.csv' # Name and path for the data file
+filename = r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\Risø Data formatted 2023.csv' # Name and path for the data file
 filedate_beginning = '2023-01-01' # Beginning date in the data file
 filedate_end = '2024-01-01' # End date in the data file
 dataresolution = '1min' # Time step in the data file (or data frequency to use)
@@ -69,7 +69,7 @@ end = '2024-01-01 00:00:00' # End date for the simulation
 resolution = 15 # Tracker optimization resolution in minutes (if needed)
 decomposition = False # Whether a decomposition model should be used or not
 clearskymodel = False # Whether a clear sky model should be used or not
-threshold_VI = 40 # Value for the variability index that corresponds to an hesitation factor of 1 in the TeraBase model
+threshold_VI = 10 # Value for the variability index that corresponds to an hesitation factor of 1 in the TeraBase model
 
 """ Getting irradiance data from a data source or calculating irradiance data using a model """
 
@@ -701,21 +701,21 @@ max_angle_backtracking = find_max_angle_backtracking(astronomical_tracking_angle
 
 """ Readings from files """
 
-IDEAL_astronomical_tracking = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\Astronomical tracking',index_col=0)
-IDEAL_binary_mode = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\Binary mode',index_col=0)
-IDEAL_brute_force_search_infinite_speed = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\Brute force search infinite speed',index_col=0)
-IDEAL_brute_force_search_limited_speed = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\Brute force search limited speed',index_col=0)
-IDEAL_CENER = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\CENER',index_col=0)
+# IDEAL_astronomical_tracking = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\Astronomical tracking',index_col=0)
+# IDEAL_binary_mode = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\Binary mode',index_col=0)
+# IDEAL_brute_force_search_infinite_speed = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\Brute force search infinite speed',index_col=0)
+# IDEAL_brute_force_search_limited_speed = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\Brute force search limited speed',index_col=0)
+# IDEAL_CENER = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\CENER',index_col=0)
     
-REAL_TIME_astronomical_tracking = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\Astronomical tracking',index_col=0)
-REAL_TIME_binary_mode_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\Binary mode extended',index_col=0)
-REAL_TIME_brute_force_search_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\Brute force search limited speed extended',index_col=0)
-REAL_TIME_TERABASE_brute_force_search_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\Brute force search limited speed & TeraBase extended',index_col=0)
-REAL_TIME_CENER_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\CENER extended',index_col=0)
+# REAL_TIME_astronomical_tracking = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\Astronomical tracking',index_col=0)
+# REAL_TIME_binary_mode_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Real time\Binary mode extended',index_col=0)
+# REAL_TIME_brute_force_search_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\Brute force search limited speed extended',index_col=0)
+# REAL_TIME_TERABASE_brute_force_search_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\Brute force search limited speed & TeraBase extended',index_col=0)
+# REAL_TIME_CENER_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\CENER extended',index_col=0)
 
-FORECAST_binary_mode_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Forecast\Binary mode',index_col=0)
-FORECAST_brute_force_search_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Forecast\Brute force search limited speed',index_col=0)
-FORECAST_CENER_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Forecast\CENER extended',index_col=0)
+# FORECAST_binary_mode_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Forecast\Binary mode',index_col=0)
+# FORECAST_brute_force_search_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Forecast\Brute force search limited speed',index_col=0)
+# FORECAST_CENER_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Forecast\CENER extended',index_col=0)
    
 """ Ideal case """
 
@@ -735,6 +735,8 @@ calculate_energy_produced(IDEAL_astronomical_tracking, weather, solpos, module_t
 calculate_degrees_moved(IDEAL_astronomical_tracking)
 KPIs_IDEAL_astronomical_tracking = KPIs(weather, IDEAL_astronomical_tracking, w_min, Pnom_module)
 print('Ideal astronomical')
+IDEAL_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Ideal\Astronomical tracking',index=True,mode='w')
+
 
 'Brute force search [infinite tracker speed]'
 
@@ -743,6 +745,7 @@ calculate_energy_produced(IDEAL_brute_force_search_infinite_speed, weather, solp
 calculate_degrees_moved(IDEAL_brute_force_search_infinite_speed)
 KPIs_IDEAL_brute_force_search_infinite_speed = KPIs(weather, IDEAL_brute_force_search_infinite_speed, w_min, Pnom_module)
 print('Ideal brute force infinite')
+IDEAL_brute_force_search_infinite_speed.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Ideal\Brute force search infinite speed',index=True,mode='w')
 
 'Brute force search [limited tracker speed]'
 
@@ -751,6 +754,7 @@ calculate_energy_produced(IDEAL_brute_force_search_limited_speed, weather, solpo
 calculate_degrees_moved(IDEAL_brute_force_search_limited_speed)
 KPIs_IDEAL_brute_force_search_limited_speed = KPIs(weather, IDEAL_brute_force_search_limited_speed, w_min, Pnom_module)
 print('Ideal brute force limited')
+IDEAL_brute_force_search_limited_speed.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Ideal\Brute force search limited speed',index=True,mode='w')
 
 'CENER model'
 
@@ -759,6 +763,8 @@ calculate_energy_produced(IDEAL_CENER, weather, solpos, module_type, modules_in_
 calculate_degrees_moved(IDEAL_CENER)
 KPIs_IDEAL_CENER = KPIs(weather, IDEAL_CENER, w_min, Pnom_module)
 print('Ideal CENER')
+IDEAL_CENER.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Ideal\CENER',index=True,mode='w')
+
 
 'Binary model'
 
@@ -767,6 +773,7 @@ calculate_energy_produced(IDEAL_binary_mode, weather, solpos, module_type, modul
 calculate_degrees_moved(IDEAL_binary_mode)
 KPIs_IDEAL_binary_mode = KPIs(weather, IDEAL_binary_mode, w_min, Pnom_module)
 print('Ideal binary')
+IDEAL_binary_mode.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Ideal\Binary mode',index=True,mode='w')
 
 """ Real time """
 
@@ -792,8 +799,10 @@ for i in range(1, REAL_TIME_astronomical_tracking.index.size):
 
 calculate_energy_produced(REAL_TIME_astronomical_tracking, weather, solpos, module_type, modules_in_series, module_params)
 calculate_degrees_moved(REAL_TIME_astronomical_tracking)
-KPIs_IDEAL_astronomical_tracking = KPIs(weather, REAL_TIME_astronomical_tracking, w_min, Pnom_module)      
+KPIs_REAL_TIME_astronomical_tracking = KPIs(weather, REAL_TIME_astronomical_tracking, w_min, Pnom_module)      
 print('Real astronomical')  
+REAL_TIME_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Real time\Astronomical tracking',index=True,mode='w')
+
 
 'Resample data using the relevant resolution'
 
@@ -813,6 +822,8 @@ calculate_energy_produced(REAL_TIME_brute_force_search_extended, weather, solpos
 calculate_degrees_moved(REAL_TIME_brute_force_search_extended)
 KPIs_REAL_TIME_brute_force_search_extended = KPIs(weather, REAL_TIME_brute_force_search_extended, w_min, Pnom_module)
 print('Real brute force limited')
+REAL_TIME_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Real time\Brute force search limited speed extended',index=True,mode='w')
+
 
 # Using the TeraBase model & variability factor with brute force search
 
@@ -822,6 +833,8 @@ calculate_energy_produced(REAL_TIME_TERABASE_brute_force_search_extended, weathe
 calculate_degrees_moved(REAL_TIME_TERABASE_brute_force_search_extended)
 KPIs_REAL_TIME_TERABASE_brute_force_search_extended = KPIs(weather, REAL_TIME_brute_force_search_extended, w_min, Pnom_module)
 print('Real brute force limited TeraBase')
+REAL_TIME_TERABASE_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Real time\Brute force search limited speed & TeraBase extended',index=True,mode='w')
+
 
 'CENER model'
 
@@ -837,6 +850,8 @@ if resolution*w_min >= 2*max_angle:
 else:
       REAL_TIME_CENER_extended = "Calculation impossible for this resolution" 
 print('Real CENER')
+REAL_TIME_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Real time\CENER extended',index=True,mode='w')
+
 
 'Binary model'
 
@@ -852,6 +867,8 @@ if resolution*w_min >= 2*max_angle:
 else:
       REAL_TIME_binary_mode_extended = "Calculation impossible for this resolution" 
 print('Real binary') 
+REAL_TIME_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Real time\Binary mode extended',index=True,mode='w')
+
    
 """ Forecast """
 
@@ -862,6 +879,8 @@ calculate_energy_produced(FORECAST_brute_force_search_extended, weather, solpos,
 calculate_degrees_moved(FORECAST_brute_force_search_extended)
 KPIs_FORECAST_brute_force_search_extended = KPIs(weather, FORECAST_brute_force_search_extended, w_min, Pnom_module)
 print('Forecast brute force limited')
+FORECAST_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Forecast\Brute force search limited speed',index=True,mode='w')
+
 
 'CENER model'
 
@@ -877,6 +896,8 @@ if resolution*w_min >= 2*max_angle:
 else:
       FORECAST_CENER_extended = "Calculation impossible for this resolution" 
 print('Forecast CENER')
+FORECAST_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Forecast\CENER extended',index=True,mode='w')
+ 
 
 'Binary model'
 
@@ -892,24 +913,26 @@ if resolution*w_min >= 2*max_angle:
 else:
       FORECAST_binary_mode_extended = "Calculation impossible for this resolution" 
 print('Forecast binary')
+FORECAST_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Forecast\Binary mode',index=True,mode='w')
+
   
 """ Writing in files """
 
-# IDEAL_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\Astronomical tracking',index=True,mode='w')
-# IDEAL_binary_mode.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\Binary mode',index=True,mode='w')
-# IDEAL_brute_force_search_infinite_speed.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\Brute force search infinite speed',index=True,mode='w')
-# IDEAL_brute_force_search_limited_speed.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\Brute force search limited speed',index=True,mode='w')
-# IDEAL_CENER.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\CENER',index=True,mode='w')
+# IDEAL_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\Astronomical tracking',index=True,mode='w')
+# IDEAL_binary_mode.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\Binary mode',index=True,mode='w')
+# IDEAL_brute_force_search_infinite_speed.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\Brute force search infinite speed',index=True,mode='w')
+# IDEAL_brute_force_search_limited_speed.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\Brute force search limited speed',index=True,mode='w')
+# IDEAL_CENER.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\CENER',index=True,mode='w')
     
-# REAL_TIME_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\Astronomical tracking',index=True,mode='w')
-# REAL_TIME_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\Binary mode extended',index=True,mode='w')
-# REAL_TIME_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\Brute force search limited speed extended',index=True,mode='w')
-# REAL_TIME_TERABASE_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\Brute force search limited speed & TeraBase extended',index=True,mode='w')
-# REAL_TIME_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\CENER extended',index=True,mode='w')
+# REAL_TIME_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\Astronomical tracking',index=True,mode='w')
+# REAL_TIME_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\Binary mode extended',index=True,mode='w')
+# REAL_TIME_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\Brute force search limited speed extended',index=True,mode='w')
+# REAL_TIME_TERABASE_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\Brute force search limited speed & TeraBase extended',index=True,mode='w')
+# REAL_TIME_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\CENER extended',index=True,mode='w')
 
-# FORECAST_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Forecast\Binary mode',index=True,mode='w')
-# FORECAST_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Forecast\Brute force search limited speed',index=True,mode='w')
-# FORECAST_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Forecast\CENER extended',index=True,mode='w')     
+# FORECAST_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Forecast\Binary mode',index=True,mode='w')
+# FORECAST_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Forecast\Brute force search limited speed',index=True,mode='w')
+# FORECAST_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Forecast\CENER extended',index=True,mode='w')
     
 """ Plot data """
 

@@ -737,6 +737,7 @@ KPIs_IDEAL_astronomical_tracking = KPIs(weather, IDEAL_astronomical_tracking, w_
 print('Ideal astronomical')
 IDEAL_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Ideal\Astronomical tracking',index=True,mode='w')
 
+
 'Brute force search [infinite tracker speed]'
 
 IDEAL_brute_force_search_infinite_speed = model_brute_force_search(weather, solpos, max_angle_backtracking, 2*max_angle)
