@@ -66,10 +66,9 @@ Pnom_module = 650 #  Module nominal power, in watts
 
 begin = '2023-01-01 00:00:00' # Beginning date for the simulation
 end = '2024-01-01 00:00:00' # End date for the simulation
-resolution = 15 # Tracker optimization resolution in minutes (if needed)
+resolution = 5 # Tracker optimization resolution in minutes (if needed)
 decomposition = False # Whether a decomposition model should be used or not
 clearskymodel = False # Whether a clear sky model should be used or not
-threshold_VI = 10 # Value for the variability index that corresponds to an hesitation factor of 1 in the TeraBase model
 
 """ Getting irradiance data from a data source or calculating irradiance data using a model """
 
@@ -826,15 +825,28 @@ REAL_TIME_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Docume
 
 
 # Using the TeraBase model & variability factor with brute force search
+KPI_threshold = dict()
+for threshold_VI in range(20,80,10):
+    
+    name = '5min resolution, VI '+str(threshold_VI)
+    REAL_TIME_TERABASE_brute_force_search_resamp = TeraBase(IDEAL_astronomical_tracking_resamp, brute_force_search_resamp, weather_resamp, w_min, threshold_VI, resolution)
+    REAL_TIME_TERABASE_brute_force_search_extended = extend_rotation_angle_real_time(REAL_TIME_TERABASE_brute_force_search_resamp, resolution, weather.index, max_angle_backtracking)
+    calculate_energy_produced(REAL_TIME_TERABASE_brute_force_search_extended, weather, solpos, module_type, modules_in_series, module_params)
+    calculate_degrees_moved(REAL_TIME_TERABASE_brute_force_search_extended)
+    KPIs_REAL_TIME_TERABASE_brute_force_search_extended = KPIs(weather, REAL_TIME_TERABASE_brute_force_search_extended, w_min, Pnom_module)
+    KPI_threshold[threshold_VI] = KPIs_REAL_TIME_TERABASE_brute_force_search_extended
+    print(name)
+    REAL_TIME_TERABASE_brute_force_search_extended.to_csv('C:/Users/mpa/OneDrive - EE/Documents/GitHub/2023/5min resolution, different VI/Real time/'+name,index=True,mode='w')
 
-REAL_TIME_TERABASE_brute_force_search_resamp = TeraBase(IDEAL_astronomical_tracking_resamp, brute_force_search_resamp, weather_resamp, w_min, threshold_VI, resolution)
-REAL_TIME_TERABASE_brute_force_search_extended = extend_rotation_angle_real_time(REAL_TIME_TERABASE_brute_force_search_resamp, resolution, weather.index, max_angle_backtracking)
-calculate_energy_produced(REAL_TIME_TERABASE_brute_force_search_extended, weather, solpos, module_type, modules_in_series, module_params)
-calculate_degrees_moved(REAL_TIME_TERABASE_brute_force_search_extended)
-KPIs_REAL_TIME_TERABASE_brute_force_search_extended = KPIs(weather, REAL_TIME_brute_force_search_extended, w_min, Pnom_module)
-print('Real brute force limited TeraBase')
-REAL_TIME_TERABASE_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Real time\Brute force search limited speed & TeraBase extended',index=True,mode='w')
 
+for threshold_VI in range(10,80,10):
+    
+    name = '15min resolution, VI '+str(threshold_VI)
+    REAL_TIME_TERABASE_brute_force_search_extended = pd.read_csv('C:/Users/mpa/OneDrive - EE/Documents/GitHub/2023/5min resolution, different VI/Real time/'+name)
+    KPIs_REAL_TIME_TERABASE_brute_force_search_extended = KPIs(weather, REAL_TIME_TERABASE_brute_force_search_extended, w_min, Pnom_module)
+    KPI_threshold[threshold_VI] = KPIs_REAL_TIME_TERABASE_brute_force_search_extended
+    print(name)
+    
 
 'CENER model'
 

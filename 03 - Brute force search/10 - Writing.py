@@ -831,7 +831,7 @@ REAL_TIME_TERABASE_brute_force_search_resamp = TeraBase(IDEAL_astronomical_track
 REAL_TIME_TERABASE_brute_force_search_extended = extend_rotation_angle_real_time(REAL_TIME_TERABASE_brute_force_search_resamp, resolution, weather.index, max_angle_backtracking)
 calculate_energy_produced(REAL_TIME_TERABASE_brute_force_search_extended, weather, solpos, module_type, modules_in_series, module_params)
 calculate_degrees_moved(REAL_TIME_TERABASE_brute_force_search_extended)
-KPIs_REAL_TIME_TERABASE_brute_force_search_extended = KPIs(weather, REAL_TIME_brute_force_search_extended, w_min, Pnom_module)
+KPIs_REAL_TIME_TERABASE_brute_force_search_extended = KPIs(weather, REAL_TIME_TERABASE_brute_force_search_extended, w_min, Pnom_module)
 print('Real brute force limited TeraBase')
 REAL_TIME_TERABASE_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 10\Real time\Brute force search limited speed & TeraBase extended',index=True,mode='w')
 
