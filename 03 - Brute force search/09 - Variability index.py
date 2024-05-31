@@ -867,23 +867,22 @@ print('Forecast binary')
   
 """ Writing in files """
 
-# IDEAL_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Ideal\Astronomical tracking',index=True,mode='w')
-# IDEAL_binary_mode.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Ideal\Binary mode',index=True,mode='w')
-# IDEAL_brute_force_search_infinite_speed.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Ideal\Brute force search infinite speed',index=True,mode='w')
-# IDEAL_brute_force_search_limited_speed.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Ideal\Brute force search limited speed',index=True,mode='w')
-# IDEAL_CENER.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Ideal\CENER',index=True,mode='w')
+# IDEAL_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\Astronomical tracking',index=True,mode='w')
+# IDEAL_binary_mode.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\Binary mode',index=True,mode='w')
+# IDEAL_brute_force_search_infinite_speed.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\Brute force search infinite speed',index=True,mode='w')
+# IDEAL_brute_force_search_limited_speed.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\Brute force search limited speed',index=True,mode='w')
+# IDEAL_CENER.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Ideal\CENER',index=True,mode='w')
     
-# REAL_TIME_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Real time\Astronomical tracking',index=True,mode='w')
-# REAL_TIME_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Real time\Binary mode extended',index=True,mode='w')
-# REAL_TIME_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Real time\Brute force search limited speed extended',index=True,mode='w')
-# REAL_TIME_TERABASE_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Real time\Brute force search limited speed & TeraBase extended',index=True,mode='w')
-# REAL_TIME_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Real time\CENER extended',index=True,mode='w')
+# REAL_TIME_astronomical_tracking.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\Astronomical tracking',index=True,mode='w')
+# REAL_TIME_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\Binary mode extended',index=True,mode='w')
+# REAL_TIME_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\Brute force search limited speed extended',index=True,mode='w')
+# REAL_TIME_TERABASE_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\Brute force search limited speed & TeraBase extended',index=True,mode='w')
+# REAL_TIME_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Real time\CENER extended',index=True,mode='w')
 
-# FORECAST_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Forecast\Binary mode',index=True,mode='w')
-# FORECAST_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Forecast\Brute force search limited speed',index=True,mode='w')
-# FORECAST_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\5min resolution, VI 40\Forecast\CENER extended',index=True,mode='w')     
+# FORECAST_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Forecast\Binary mode',index=True,mode='w')
+# FORECAST_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Forecast\Brute force search limited speed',index=True,mode='w')
+# FORECAST_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\Thesis-code\Saved data\15min resolution, VI 40\Forecast\CENER extended',index=True,mode='w')     
    
-    
 """ Plot data """
 
 # Tracking curves & POA irradiance
@@ -948,25 +947,6 @@ print('Forecast binary')
 
 # plt.legend()
 # plt.show()
-
-# tracking = IDEAL_astronomical_tracking
-# total_degrees_moved = tracking['degrees_moved'].sum() 
-
-# energy_produced = 0
-# temp_params = pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['sapm'][module_type]
-
-# for i in range(tracking.index.size):
-#     effective_irradiance = tracking['POA global'].iloc[i]
-    
-#     # Calculate module cell temperature with the Sandia Thermal Model
-#     temp_cell = pvlib.temperature.sapm_cell(effective_irradiance, 10, 0, **temp_params)
-    
-#     # Calculate array effective DC power output
-#     iv_params = pvlib.pvsystem.calcparams_pvsyst(effective_irradiance, temp_cell, **module_params)
-#     Pmax_dc_module = pvlib.pvsystem.max_power_point(*iv_params)['p_mp']
-#     Pmax_dc_array = Pmax_dc_module*modules_in_series
-    
-#     energy_produced += Pmax_dc_array/60/1000
 
 
 
