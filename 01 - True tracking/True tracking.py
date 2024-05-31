@@ -20,10 +20,10 @@ from math import cos, sin, atan, atan2, radians, degrees
 tz = 'Europe/Copenhagen'
 latitude = 55.696166
 longitude = 12.105216
-name = 'Risoe'
+name = 'Risø'
 axis_tilt=0
 axis_azimuth=180
-max_angle=55
+max_angle=45
 altitude = 14.5
 
 sandia_modules = pvlib.pvsystem.retrieve_sam('SandiaMod')
@@ -40,7 +40,7 @@ temperature_model_parameters = pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['s
 
 weather = pvlib.iotools.get_pvgis_tmy(latitude, longitude)[0]
 weather.index.name = "utc_time"
-timeseries = weather.index
+timeseries = pd.date_range(start='2023-06-01', end='2023-06-02',freq="1min")
 
 """ Calculation of the rotation angle - Library for modeling tilt angles for single-axis tracker arrays """
 
@@ -54,14 +54,16 @@ truetracking_angles = pvlib.tracking.singleaxis(
     axis_tilt=axis_tilt,
     axis_azimuth=axis_azimuth,
     max_angle=max_angle,
-    backtrack=False,  # for true-tracking
-    gcr=0.5)  # irrelevant for true-tracking
+    backtrack=True,  # for true-tracking
+    gcr=0.28)  # irrelevant for true-tracking
 
 truetracking_position = truetracking_angles['tracker_theta'].fillna(0)
 
 
-truetracking_position_1d = truetracking_position[0:23]
-truetracking_position_1d.plot(title='Truetracking Curve')
+
+truetracking_position.plot(color='green')
+plt.ylabel('Tracker tilt (°)')
+plt.grid() 
 
 plt.show()
 

@@ -22,16 +22,16 @@ from math import cos, sin, atan, atan2, radians, degrees
 tz = 'Europe/Copenhagen'
 latitude = 55.696166
 longitude = 12.105216
-name = 'Risoe'
+name = 'Risø'
 axis_tilt=0
 axis_azimuth=180
-max_angle=55
+max_angle=45
 altitude = 14.5
 GCR = 0.28
 
 """ Calculation of the rotation angle - Library for modeling tilt angles for single-axis tracker arrays """
 
-times = pd.date_range('2019-01-01', '2019-01-02', freq='5min', tz=tz)
+times = pd.date_range('2023-06-01', '2023-06-02', freq='1min', tz=tz)
 
 solpos = pvlib.solarposition.get_solarposition(times, latitude, longitude, altitude)
 
@@ -52,7 +52,7 @@ truetracking_position = truetracking_angles['tracker_theta'].fillna(0)
 
 # Backtracking
 
-for gcr in [0.2, 0.4, 0.6]:
+for gcr in [0.28, 0.4, 0.6]:
     backtracking_angles = pvlib.tracking.singleaxis(
         apparent_zenith=solpos['apparent_zenith'],
         apparent_azimuth=solpos['azimuth'],
@@ -63,10 +63,15 @@ for gcr in [0.2, 0.4, 0.6]:
         gcr=gcr)
 
     backtracking_position = backtracking_angles['tracker_theta'].fillna(0)
-    backtracking_position.plot(title='Backtracking Curve - maximum angle 55°',
-                               label=f'GCR:{gcr:0.01f}',
+    if gcr==0.28:
+        backtracking_position.plot(label=f'GCR:{gcr}',
+                               ax=ax,
+                               color='green')
+    else:
+        backtracking_position.plot(label=f'GCR:{gcr}',
                                ax=ax)
-
+plt.ylabel('Tracker tilt (°)')
+plt.grid()
 plt.legend()
 plt.show() 
     
