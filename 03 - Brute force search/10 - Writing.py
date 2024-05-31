@@ -25,7 +25,7 @@ latitude = 55.696166
 longitude = 12.105216
 altitude = 14.5
 GCR = 0.28
-albedo = 0.3
+albedo = 0.25
 
 # Tracker & axis parameters
 
@@ -69,7 +69,7 @@ end = '2024-01-01 00:00:00' # End date for the simulation
 resolution = 15 # Tracker optimization resolution in minutes (if needed)
 decomposition = False # Whether a decomposition model should be used or not
 clearskymodel = False # Whether a clear sky model should be used or not
-threshold_VI = 10 # Value for the variability index that corresponds to an hesitation factor of 1 in the TeraBase model
+threshold_VI = 40 # Value for the variability index that corresponds to an hesitation factor of 1 in the TeraBase model
 
 """ Getting irradiance data from a data source or calculating irradiance data using a model """
 
@@ -86,7 +86,6 @@ else:
 
 # Select the days to rum the simulation
 
-weather = weather.loc[begin:end]
 
 """ Calculating sun & weather parameters for each period """
 
@@ -701,21 +700,23 @@ max_angle_backtracking = find_max_angle_backtracking(astronomical_tracking_angle
 
 """ Readings from files """
 
-# IDEAL_astronomical_tracking = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\Astronomical tracking',index_col=0)
-# IDEAL_binary_mode = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\Binary mode',index_col=0)
-# IDEAL_brute_force_search_infinite_speed = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\Brute force search infinite speed',index_col=0)
-# IDEAL_brute_force_search_limited_speed = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\Brute force search limited speed',index_col=0)
-# IDEAL_CENER = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Ideal\CENER',index_col=0)
-    
-# REAL_TIME_astronomical_tracking = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\Astronomical tracking',index_col=0)
-# REAL_TIME_binary_mode_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Real time\Binary mode extended',index_col=0)
-# REAL_TIME_brute_force_search_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\Brute force search limited speed extended',index_col=0)
-# REAL_TIME_TERABASE_brute_force_search_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\Brute force search limited speed & TeraBase extended',index_col=0)
-# REAL_TIME_CENER_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Real time\CENER extended',index_col=0)
+weather_2 = weather.copy()
 
-# FORECAST_binary_mode_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Forecast\Binary mode',index_col=0)
-# FORECAST_brute_force_search_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Forecast\Brute force search limited speed',index_col=0)
-# FORECAST_CENER_extended = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Forecast\CENER extended',index_col=0)
+IDEAL_astronomical_tracking_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Ideal\Astronomical tracking',index_col=0)
+IDEAL_binary_mode_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Ideal\Binary mode',index_col=0)
+IDEAL_brute_force_search_infinite_speed_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Ideal\Brute force search infinite speed',index_col=0)
+IDEAL_brute_force_search_limited_speed_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Ideal\Brute force search limited speed',index_col=0)
+IDEAL_CENER_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Ideal\CENER',index_col=0)
+    
+REAL_TIME_astronomical_tracking_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Real time\Astronomical tracking',index_col=0)
+REAL_TIME_binary_mode_extended_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Real time\Binary mode extended',index_col=0)
+REAL_TIME_brute_force_search_extended_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Real time\Brute force search limited speed extended',index_col=0)
+REAL_TIME_TERABASE_brute_force_search_extended_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Real time\Brute force search limited speed & TeraBase extended',index_col=0)
+REAL_TIME_CENER_extended_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Real time\CENER extended',index_col=0)
+
+FORECAST_binary_mode_extended_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Forecast\Binary mode',index_col=0)
+FORECAST_brute_force_search_extended_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Forecast\Brute force search limited speed',index_col=0)
+FORECAST_CENER_extended_2 = pd.read_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\15min resolution, VI 40\Forecast\CENER extended',index_col=0)
    
 """ Ideal case """
 
@@ -933,68 +934,113 @@ FORECAST_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitH
 # FORECAST_binary_mode_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Forecast\Binary mode',index=True,mode='w')
 # FORECAST_brute_force_search_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Forecast\Brute force search limited speed',index=True,mode='w')
 # FORECAST_CENER_extended.to_csv(r'C:\Users\mpa\OneDrive - EE\Documents\GitHub\2023\5min resolution, VI 40\Forecast\CENER extended',index=True,mode='w')
+
+begin = '2023-05-23 00:00:00' # Beginning date for the simulation
+end = '2023-05-24 00:00:30' # End date for the simulation
+
+weather = weather_2.loc[begin:end]
+clearsky = clearsky_2.loc[begin:end]
+
+IDEAL_astronomical_tracking = IDEAL_astronomical_tracking_2.loc[begin:end]
+IDEAL_binary_mode = IDEAL_binary_mode_2.loc[begin:end]
+IDEAL_brute_force_search_infinite_speed = IDEAL_brute_force_search_infinite_speed_2.loc[begin:end]
+IDEAL_brute_force_search_limited_speed = IDEAL_brute_force_search_limited_speed_2.loc[begin:end]
+IDEAL_CENER = IDEAL_CENER_2.loc[begin:end]
     
+REAL_TIME_astronomical_tracking = REAL_TIME_astronomical_tracking_2.loc[begin:end]
+REAL_TIME_binary_mode_extended = REAL_TIME_binary_mode_extended_2.loc[begin:end]
+REAL_TIME_brute_force_search_extended = REAL_TIME_brute_force_search_extended_2.loc[begin:end]
+REAL_TIME_TERABASE_brute_force_search_extended = REAL_TIME_TERABASE_brute_force_search_extended_2.loc[begin:end]
+REAL_TIME_CENER_extended = REAL_TIME_CENER_extended_2.loc[begin:end]
+
+IDEAL_astronomical_tracking.index = weather.index
+IDEAL_brute_force_search_infinite_speed.index = weather.index
+IDEAL_binary_mode.index = weather.index
+IDEAL_brute_force_search_limited_speed.index = weather.index
+IDEAL_CENER.index = weather.index
+
+REAL_TIME_astronomical_tracking.index = weather.index
+REAL_TIME_binary_mode_extended.index = weather.index
+REAL_TIME_brute_force_search_extended.index = weather.index
+REAL_TIME_TERABASE_brute_force_search_extended.index = weather.index
+REAL_TIME_CENER_extended.index = weather.index
+
 """ Plot data """
 
 # Tracking curves & POA irradiance
 
-# fig, axes = plt.subplots(nrows=3, ncols=1, sharex=False)
+fig, axes = plt.subplots(nrows=2, ncols=1, sharex=False)
 
 'Ideal case'
 
-#IDEAL_astronomical_tracking['angle'].plot(title='Tracking Curve', label="Ideal astronomical tracking",ax=axes[0], color='green')
-#IDEAL_brute_force_search_infinite_speed['angle'].plot(title='Tracking Curve', label="Ideal brute force search - infinite tracker speed", ax=axes[0], color='blue')
-#IDEAL_brute_force_search_limited_speed['angle'].plot(title='Tracking Curve', label="Ideal brute force search - limited tracker speed", ax=axes[0], color='purple')
-#IDEAL_CENER['angle'].plot(title='Tracking Curve', label="Ideal CENER",ax=axes[0], color='red')
-#IDEAL_binary_mode['angle'].plot(title='Tracking Curve', label="Ideal binary mode - either astronomical angle or 0",ax=axes[0], color='black')
+IDEAL_astronomical_tracking['angle'].plot(title='Tracking curves for the real-time algorithm', label="Astronomical tracking",ax=axes[0], color='navy', fontsize=16)
+# IDEAL_binary_mode['angle'].plot(title='Tracking curves for the ideal case', label="Binary model",ax=axes[0], color='tan', fontsize=16)
+# IDEAL_brute_force_search_infinite_speed['angle'].plot(title='Tracking curves for the ideal case', label="Brute force search", ax=axes[0], color='firebrick', fontsize=16)
+#IDEAL_brute_force_search_limited_speed['angle'].plot(title='Tracking Curve', label="Ideal brute force search - limited tracker speed", ax=axes[0], color='purple', fontsize=16)
+# IDEAL_CENER['angle'].plot(title='Tracking curves for the ideal case', label="CENER model",ax=axes[0], color='c', fontsize=16)
 
-#IDEAL_astronomical_tracking['POA global'].plot(title='Irradiance', label="POA ideal astronomical tracking", ax=axes[1], color='green')
-#IDEAL_brute_force_search_infinite_speed['POA global'].plot(title='Irradiance', label="POA ideal brute force search - infinite tracker speed", ax=axes[1], color='blue')
-#IDEAL_brute_force_search_limited_speed['POA global'].plot(title='Irradiance', label="POA ideal brute force search - limited tracker speed", ax=axes[1], color='purple')
-#IDEAL_CENER['POA global'].plot(title='Irradiance', label="POA ideal CENER", ax=axes[1], color='red')
-#IDEAL_binary_mode['POA global'].plot(title='Irradiance', label="POA ideal binary mode", ax=axes[1], color='black')
+# IDEAL_astronomical_tracking['POA global'].plot(title='POA Irradiance', label="Astronomical tracking", ax=axes[1], color='navy', fontsize=14)
+# IDEAL_binary_mode['POA global'].plot(title='POA Irradiance', label="Binary model", ax=axes[1], color='tan', fontsize=14)
+# IDEAL_brute_force_search_infinite_speed['POA global'].plot(title='POA Irradiance', label="Brute force search", ax=axes[1], color='firebrick', fontsize=14)
+# IDEAL_brute_force_search_limited_speed['POA global'].plot(title='POA Irradiance', label="POA ideal brute force search - limited tracker speed", ax=axes[1], color='purple', fontsize=14)
+# IDEAL_CENER['POA global'].plot(title='POA Irradiance', label="CENER model", ax=axes[1], color='c', fontsize=14)
 
 'Real time'
 
-# REAL_TIME_astronomical_tracking['angle'].plot(title='Tracking Curve', label="Real time astronomical tracking",ax=axes[0], color='green')
-# REAL_TIME_brute_force_search_extended['angle'].plot(title='Tracking Curve', label="Real time brute force search", ax=axes[0], color='purple')
-# REAL_TIME_TERABASE_brute_force_search_extended['angle'].plot(title='Tracking Curve', label="Real time brute force search TeraBase", ax=axes[0], color='purple', linestyle='dotted')
-# REAL_TIME_CENER_extended['angle'].plot(title='Tracking Curve', label="Real time CENER",ax=axes[0], color='red')
-# REAL_TIME_binary_mode_extended['angle'].plot(title='Tracking Curve', label="Real time binary mode - either astronomical angle or 0",ax=axes[0], color='black')
+# REAL_TIME_astronomical_tracking['angle'].plot(title='Tracking Curve', label="Astronomical tracking",ax=axes[0], color='navy', fontsize=16)
+REAL_TIME_binary_mode_extended['angle'].plot(title='Tracking Curve', label="Binary model",ax=axes[0], color='tan', fontsize=16)
+REAL_TIME_brute_force_search_extended['angle'].plot(title='Tracking Curve', label="Brute force search", ax=axes[0], color='firebrick', fontsize=16)
+# REAL_TIME_TERABASE_brute_force_search_extended['angle'].plot(title='Tracking Curve', label="Real time brute force search TeraBase", ax=axes[0], color='purple', linestyle='dotted', fontsize=16)
+REAL_TIME_CENER_extended['angle'].plot(title='Tracking Curve', label="CENER model",ax=axes[0], color='c', fontsize=16)
 
-# REAL_TIME_astronomical_tracking['POA global'].plot(title='Irradiance', label="POA Real time astronomical tracking", ax=axes[1], color='green')
-# REAL_TIME_brute_force_search_extended['POA global'].plot(title='Irradiance', label="POA Real time brute force search", ax=axes[1], color='purple')
-# REAL_TIME_TERABASE_brute_force_search_extended['POA global'].plot(title='Irradiance', label="POA Real time brute force search TeraBase", ax=axes[1], color='purple', linestyle='dotted')
-# REAL_TIME_CENER_extended['POA global'].plot(title='Irradiance', label="POA Real time CENER", ax=axes[1], color='red')
-# REAL_TIME_binary_mode_extended['POA global'].plot(title='Irradiance', label="POA Real time binary mode", ax=axes[1], color='black')
+# REAL_TIME_astronomical_tracking['POA global'].plot(title='Irradiance', label="Astronomical tracking", ax=axes[1], color='navy', fontsize=16)
+# REAL_TIME_binary_mode_extended['POA global'].plot(title='Irradiance', label="Binary model", ax=axes[1], color='tan', fontsize=16)
+# REAL_TIME_brute_force_search_extended['POA global'].plot(title='Irradiance', label="Brute force search", ax=axes[1], color='firebrick', fontsize=16)
+# REAL_TIME_TERABASE_brute_force_search_extended['POA global'].plot(title='Irradiance', label="POA Real time brute force search TeraBase", ax=axes[1], color='purple', linestyle='dotted', fontsize=16)
+# REAL_TIME_CENER_extended['POA global'].plot(title='Irradiance', label="CENER model", ax=axes[1], color='c', fontsize=16)
 
 'Forecast'
 
-#FORECAST_brute_force_search_extended['angle'].plot(title='Tracking Curve', label="Forecast brute force search - limited tracker speed", ax=axes[0], color='pink')
-#FORECAST_CENER_extended['angle'].plot(title='Tracking Curve', label="Forecast CENER",ax=axes[0], color='red')
-#FORECAST_binary_mode_extended['angle'].plot(title='Tracking Curve', label="Forecast binary mode - either astronomical angle or 0",ax=axes[0], color='black')
+# FORECAST_brute_force_search_extended['angle'].plot(title='Tracking Curve', label="Brute force search", ax=axes[0], color='pink', fontsize=16)
+# FORECAST_binary_mode_extended['angle'].plot(title='Tracking Curve', label="Binary model",ax=axes[0], color='black', fontsize=16)
+# FORECAST_CENER_extended['angle'].plot(title='Tracking Curve', label="CENER model",ax=axes[0], color='red', fontsize=16)
 
-#FORECAST_brute_force_search_extended['POA global'].plot(title='Irradiance', label="POA Forecast brute force search - limited tracker speed", ax=axes[1], color='pink')
-#FORECAST_CENER_extended['POA global'].plot(title='Irradiance', label="POA Forecast CENER", ax=axes[1], color='red')
-#FORECAST_binary_mode_extended['POA global'].plot(title='Irradiance', label="POA Forecast binary mode", ax=axes[1], color='black')
+# FORECAST_brute_force_search_extended['POA global'].plot(title='Irradiance', label="Brute force search", ax=axes[1], color='pink', fontsize=16)
+# FORECAST_binary_mode_extended['POA global'].plot(title='Irradiance', label="Binary model", ax=axes[1], color='black', fontsize=16)
+# FORECAST_CENER_extended['POA global'].plot(title='Irradiance', label="CENER model", ax=axes[1], color='red', fontsize=16)
 
 'Weather data'
 
-# weather['GHI'].plot(title='Irradiance', label="GHI", ax=axes[2], color='blue')
-# weather['DHI'].plot(title='Irradiance', label="DHI", ax=axes[2], color='orange')
-# weather['DNI'].plot(title='Irradiance', label="DNI", ax=axes[2], color='green')
-# ax2 = axes[2].twinx()
+weather['GHI'].plot(title='Irradiance measured', label="GHI", ax=axes[1], color='blue', fontsize=16)
+weather['DHI'].plot(title='Irradiance measured', label="DHI", ax=axes[1], color='orange', fontsize=16)
+weather['DNI'].plot(title='Irradiance measured', label="DNI", ax=axes[1], color='green', fontsize=16)
 # weather['Variability GHI'].plot(title='Irradiance', label="Variability", ax=ax2, color='black')
 
-# axes[0].legend(title="Tracker Tilt")
-# axes[1].legend(title="POA Irradiance")
-# axes[2].legend(title="Irradiance")
-# axes[2].set_ylabel("Irradiance (W/m2)")
+axes[0].set_ylabel("Tracker Tilt (°)", fontsize=20)
+axes[1].set_ylabel("Irradiance (W/m2)", fontsize=20)
 # ax2.set_ylabel("Variability factor")
 
-# axes[0].grid()
-# axes[1].grid()
+axes[0].grid(True, which='both', axis='both')
+axes[1].grid(True, which='both', axis='both')
+axes[0].title.set_size(28)
+axes[1].title.set_size(28)
+axes[0].legend(fontsize=18)
+axes[1].legend(fontsize=18)
 # axes[2].grid()
 
-# plt.legend()
-# plt.show()
+plt.show()
+
+fig, axes = plt.subplots(nrows=1, ncols=1, sharex=False)
+weather['GHI'].plot(label="GHI", ax=axes, color='blue')
+weather['DHI'].plot(label="DHI", ax=axes, color='orange')
+weather['DNI'].plot(label="DNI", ax=axes, color='green')
+ax2 = axes.twinx()
+weather['Variability GHI'].plot(label="Variability index", ax=ax2, color='black', linestyle='dashed')
+axes.set_ylim(0)
+ax2.set_ylim(0,140)
+axes.set_ylabel("Irradiance (W/m2)")
+ax2.set_ylabel("Variability")
+axes.grid(True, which='both', axis='both')
+axes.legend(loc='upper right')
+ax2.legend(loc='upper left')
+plt.show()
